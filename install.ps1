@@ -60,9 +60,6 @@ if (Test-Path -LiteralPath $dll) {
     $h = Get-Sha256 $dll
     if ($script:Known['Wiz8.dll'].ContainsKey($h)) { Write-Info ('Wiz8.dll: ' + $script:Known['Wiz8.dll'][$h]) }
     else { Write-Warn2 "Wiz8.dll is a Fan Patch build this package was not checked with ($h)." }
-    if ($h -eq '28953363c6090f12a7a466397b619c43e6f26da28dbc5f8554d822ee66259378' -and -not $NoHdUi) {
-        Write-Warn2 'The HD mod was tested with Fan Patch build 6735; with the Steam build 6709 it is untested.'
-    }
 }
 if (-not $Width -or -not $Height) {
     $r = Get-NativeResolution
