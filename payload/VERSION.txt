@@ -1,0 +1,4 @@
+wizardry8-hdui: 37b02d8 HD backgrounds: masked menu overlay and wide camp picture
+wiz8hd.asi sha256: cd02d147f363c6487d1887d082c5537b7dc4532486c98eaf5d0087077f8f9a8b
+backgrounds: 42
+updated: 2026-10-23 19:08

@@ -1,0 +1,7 @@
+*.ps1 text eol=crlf
+*.cmd text eol=crlf
+*.md text eol=lf
+# payload files go to the game byte for byte
+payload/** -text
+payload/wiz8hd_bg/** filter=lfs diff=lfs merge=lfs -text
+payload/wiz8hd_fonts/*.ttf filter=lfs diff=lfs merge=lfs -text
