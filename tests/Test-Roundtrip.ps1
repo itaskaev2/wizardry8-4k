@@ -79,7 +79,7 @@ Check ((Get-Sha256 (Join-Path $g 'dgVoodooCpl.exe')) -eq '87fb878166dcaef3e75ff1
 foreach ($f in 'dgVoodoo.conf', 'wiz8hd.asi', 'wiz8hd.ini') {
     Check ((Get-Sha256 (Join-Path $g $f)) -eq (Get-Sha256 (Join-Path $payload $f))) "$f = payload"
 }
-foreach ($d in 'wiz8hd_fonts', 'wiz8hd_bg', 'wiz8hd_ui') {
+foreach ($d in 'wiz8hd_fonts', 'wiz8hd_bg') {
     $p = @(Get-ChildItem -LiteralPath (Join-Path $payload $d) -File)
     $bad = @($p | Where-Object { -not (Test-Path -LiteralPath (Join-Path $g "$d\$($_.Name)")) -or (Get-Sha256 (Join-Path $g "$d\$($_.Name)")) -ne (Get-Sha256 $_.FullName) })
     Check ($bad.Count -eq 0) "$d\ = payload ($($p.Count) files)"

@@ -7,8 +7,7 @@
     1. 3DVideo.CFG: DirectX7_1 renderer at the display's native resolution, 32-bit.
     2. dgVoodoo2 2.87.5 (DDraw.dll, D3DImm.dll, dgVoodooCpl.exe) + dgVoodoo.conf: fake fullscreen
        (borderless over the whole screen), 16x anisotropic, 8x MSAA, no watermark.
-    3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\ + wiz8hd_ui\: HD TrueType text, HUD at the screen
-       edges, stone side panels beside the 4:3 screens,
+    3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\: HD TrueType text, HUD at the screen edges,
        wide HD menu/loading/camp pictures (Miles loads *.asi from the game folder).
     4. nGlide: 3dfx splash off (HKCU\Software\Zeus Software\nGlide2 Splash=0).
     5. Desktop shortcut "Wizardry 8 (Fan Patch 4K)" -> Wiz8_v128.exe (Steam's Play button runs the
@@ -74,7 +73,7 @@ if ($DetectOnly) { return }
 if (-not $WhatIf) { Assert-GameNotRunning $GamePath }
 
 if (-not $NoHdUi) {
-    $need = @('wiz8hd_fonts', 'wiz8hd_ui'); if (-not $NoBackgrounds) { $need += 'wiz8hd_bg' }
+    $need = @('wiz8hd_fonts'); if (-not $NoBackgrounds) { $need += 'wiz8hd_bg' }
     $stubs = @(Get-LfsPointers @($need | ForEach-Object { Join-Path $payload $_ }))
     if ($stubs.Count) {
         Write-Step "Downloading $($stubs.Count) payload files from GitHub (this copy has Git LFS stubs, e.g. from Download ZIP)"
@@ -159,7 +158,7 @@ try {
         } else {
             Put-File (Join-Path $payload 'wiz8hd.ini') 'wiz8hd.ini'
         }
-        $dirs = @('wiz8hd_fonts', 'wiz8hd_ui')
+        $dirs = @('wiz8hd_fonts')
         if (-not $NoBackgrounds) { $dirs += 'wiz8hd_bg' }
         foreach ($d in $dirs) {
             Ensure-Dir $m $GamePath $d -WhatIf:$WhatIf

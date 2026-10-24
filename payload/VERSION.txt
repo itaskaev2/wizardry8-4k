@@ -1,4 +1,4 @@
-wizardry8-hdui: 76bc30d HD pictures: async decoding, per-pixel ownership, faster compose and checks
-wiz8hd.asi sha256: 4b523febcade50c66127bef333f16e2b173a48f77bea0cd344964d9b3bc7c799
+wizardry8-hdui: bb99a47 Remove side panels
+wiz8hd.asi sha256: bf1cfae57a0e80b88239d5a1372f798eb40bc3068fd24344eac910b1ebb2ba69
 backgrounds: 42
-updated: 2026-10-24 18:11
+updated: 2026-10-24 18:29
