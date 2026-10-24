@@ -1,5 +1,7 @@
 # Wizardry 8 — 4K без рамок + HD-интерфейс (установщик для Steam-версии)
 
+**English version: [README.en.md](README.en.md)** | Русский
+
 Wizardry 8 из Steam в родном разрешении монитора (например 4K), на весь экран без рамок, с чётким HD-текстом,
 интерфейсом без растяжения и широкими HD-фонами. Всё ставится одним скриптом и так же одним скриптом убирается.
 
@@ -119,7 +121,7 @@ Wizardry 8 из Steam в родном разрешении монитора (н�
   откат байт в байт.
 - `tools\Update-Payload.ps1` — обновить `payload\` после пересборки мода (`wizardry8-hdui`: `./build.sh`,
   `build\wiz8hd.asi` → `dist\`). Картинки и шрифты хранятся в Git LFS.
-- `tools\make_compare.py <wizardry8-hdui>\shots` — собрать картинки «до/после» в `docs\`.
+- `tools\make_compare.py <wizardry8-hdui>\shots` — собрать картинки «до/после» в `docs\` (русские и английские).
 
 ## Лицензии и происхождение
 
