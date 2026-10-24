@@ -2,7 +2,8 @@
 .SYNOPSIS
   Wizardry 8 (Steam) for 4K / any native resolution, borderless, with the wiz8hd HD interface mod.
 .DESCRIPTION
-  Works on the Steam version, which already ships Fan Patch 1.28 (Wiz8_v128.exe) and mods\dgVoodoo2_87_5.zip.
+  Needs the Steam version with the community Fan Patch 1.28 (Wiz8_v128.exe) extracted into the game folder;
+  Steam does not ship it (see README, "Требования"). dgVoodoo2 comes from mods\dgVoodoo2_87_5.zip or GitHub.
     1. 3DVideo.CFG: DirectX7_1 renderer at the display's native resolution, 32-bit.
     2. dgVoodoo2 2.87.5 (DDraw.dll, D3DImm.dll, dgVoodooCpl.exe) + dgVoodoo.conf: fake fullscreen
        (borderless over the whole screen), 16x anisotropic, 8x MSAA, no watermark.
@@ -47,7 +48,7 @@ Write-Info $GamePath
 $exe = Join-Path $GamePath 'Wiz8_v128.exe'
 if (-not (Test-Path -LiteralPath $exe)) {
     $fp = Get-ChildItem -LiteralPath (Join-Path $GamePath 'mods') -Filter 'Wizardry8FanPatch*.7z' -ErrorAction SilentlyContinue | Select-Object -First 1
-    $hint = if ($fp) { "Extract mods\$($fp.Name) into the game folder" } else { 'Install Wizardry 8 Fan Patch 1.28' }
+    $hint = if ($fp) { "Extract mods\$($fp.Name) into the game folder" } else { 'Download Wizardry 8 Fan Patch 1.28 (build 6709, see README) and extract it into the game folder' }
     throw "Wiz8_v128.exe (Fan Patch 1.28) not found. $hint, then run this again."
 }
 $exeHash = Get-Sha256 $exe

@@ -7,7 +7,7 @@ $script:SteamAppId = '245450'
 $script:Known = @{
     'Wiz8_v128.exe' = @{ 'fdca6d9cd0940034191e82b8e2900de26bb25e381c74128dcb8967360a9fb824' = 'Fan Patch 1.28 (build 1.2.8)' }
     'Wiz8.dll'      = @{
-        '28953363c6090f12a7a466397b619c43e6f26da28dbc5f8554d822ee66259378' = 'Fan Patch 1.28 build 6709 (as shipped by Steam)'
+        '28953363c6090f12a7a466397b619c43e6f26da28dbc5f8554d822ee66259378' = 'Fan Patch 1.28 build 6709'
         '702851cf5bc09d9d5c749f11c5c058e62a27f4be8975718f54cceb6c127da612' = 'Fan Patch 1.28 build 6735 (Mini-Update)'
     }
 }
