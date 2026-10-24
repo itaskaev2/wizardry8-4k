@@ -20,6 +20,7 @@ $script:DgVoodoo = @{
 }
 $script:DefaultNGlideKey = 'HKCU:\Software\Zeus Software\nGlide2'
 $script:ShortcutName = 'Wizardry 8 (Fan Patch 4K).lnk'
+$script:LfsBatchUrl = 'https://github.com/itaskaev2/wizardry8-4k.git/info/lfs/objects/batch'
 
 function Write-Step([string]$msg) { Write-Host "==> $msg" -ForegroundColor Cyan }
 function Write-Info([string]$msg) { Write-Host "    $msg" }
@@ -27,6 +28,46 @@ function Write-Warn2([string]$msg) { Write-Host "    WARNING: $msg" -ForegroundC
 
 function Get-Sha256([string]$path) {
     (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLower()
+}
+
+# GitHub's "Download ZIP" has Git LFS pointer stubs in place of the fonts and backgrounds.
+function Get-LfsPointers([string[]]$dirs) {
+    foreach ($d in $dirs) {
+        foreach ($f in Get-ChildItem -LiteralPath $d -File) {
+            if ($f.Length -ge 200) { continue }
+            $t = [IO.File]::ReadAllText($f.FullName)
+            if ($t -match '^version https://git-lfs\.github\.com/spec/v1\s+oid sha256:([0-9a-f]{64})\s+size (\d+)') {
+                [pscustomobject]@{ Path = $f.FullName; Oid = $Matches[1]; Size = [long]$Matches[2] }
+            }
+        }
+    }
+}
+
+# Replace the stubs with the real files: the LFS batch API gives a download link per SHA-256, checked after download.
+function Restore-LfsFiles($pointers) {
+    [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+    $ProgressPreference = 'SilentlyContinue'
+    $byOid = @{}
+    foreach ($p in $pointers) { $byOid[$p.Oid] += @($p) }
+    $oids = @($byOid.Keys)
+    for ($i = 0; $i -lt $oids.Count; $i += 50) {
+        $chunk = $oids[$i..([Math]::Min($i + 49, $oids.Count - 1))]
+        $body = @{ operation = 'download'; transfers = @('basic')
+                   objects = @($chunk | ForEach-Object { @{ oid = $_; size = $byOid[$_][0].Size } }) } | ConvertTo-Json -Depth 4
+        $r = Invoke-RestMethod -Method Post -Uri $script:LfsBatchUrl -Body $body -ContentType 'application/vnd.git-lfs+json' `
+                               -Headers @{ Accept = 'application/vnd.git-lfs+json' } -UseBasicParsing
+        foreach ($o in $r.objects) {
+            if ($o.error) { throw "Git LFS $($o.oid): $($o.error.message)" }
+            $h = @{}
+            if ($o.actions.download.header) { $o.actions.download.header.PSObject.Properties | ForEach-Object { $h[$_.Name] = $_.Value } }
+            $tmp = [IO.Path]::GetTempFileName()
+            try {
+                Invoke-WebRequest -Uri $o.actions.download.href -Headers $h -OutFile $tmp -UseBasicParsing
+                if ((Get-Sha256 $tmp) -ne $o.oid) { throw "Git LFS $($o.oid): downloaded file has a wrong SHA-256" }
+                foreach ($p in $byOid[$o.oid]) { Copy-Item -LiteralPath $tmp -Destination $p.Path -Force }
+            } finally { Remove-Item -LiteralPath $tmp -Force -ErrorAction SilentlyContinue }
+        }
+    }
 }
 
 # Steam: SteamPath from the registry, every library from libraryfolders.vdf, the app manifest names the folder.

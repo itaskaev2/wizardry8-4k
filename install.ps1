@@ -31,7 +31,7 @@ param(
     [string]$ShortcutDir = [Environment]::GetFolderPath('Desktop'),
     [switch]$SkipNGlide,
     [string]$NGlideKey,          # registry key override (tests)
-    [switch]$Offline,            # never download dgVoodoo2 when mods\ lacks it
+    [switch]$Offline,            # never download (dgVoodoo2 when mods\ lacks it, Git LFS payload files)
     [switch]$DetectOnly,         # print the game folder and checks, change nothing
     [switch]$WhatIf
 )
@@ -71,6 +71,16 @@ Write-Info "resolution: ${Width}x${Height}"
 if (Test-Path -LiteralPath (Join-Path (Get-StateDir $GamePath) 'manifest.json')) { Write-Info 'already installed: updating in place' }
 if ($DetectOnly) { return }
 if (-not $WhatIf) { Assert-GameNotRunning $GamePath }
+
+if (-not $NoHdUi) {
+    $need = @('wiz8hd_fonts'); if (-not $NoBackgrounds) { $need += 'wiz8hd_bg' }
+    $stubs = @(Get-LfsPointers @($need | ForEach-Object { Join-Path $payload $_ }))
+    if ($stubs.Count) {
+        Write-Step "Downloading $($stubs.Count) payload files from GitHub (this copy has Git LFS stubs, e.g. from Download ZIP)"
+        if ($Offline) { throw 'payload\ has Git LFS stubs instead of fonts/backgrounds, and -Offline was given. Use the release zip or git clone with Git LFS.' }
+        if (-not $WhatIf) { Restore-LfsFiles $stubs; Write-Info 'done, SHA-256 checked' }
+    }
+}
 
 $m = Read-Manifest $GamePath
 if (-not $m) { $m = New-Manifest $GamePath }
