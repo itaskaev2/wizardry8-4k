@@ -2,7 +2,7 @@
 .SYNOPSIS
   Refresh payload\ from a wizardry8-hdui checkout (built dist\) and a configured game folder.
 .DESCRIPTION
-  Copies wiz8hd.asi, the wiz8hd.ini template, wiz8hd_fonts\ and wiz8hd_bg\ from <HdUi>\dist and
+  Copies wiz8hd.asi, the wiz8hd.ini template, wiz8hd_fonts\, wiz8hd_bg\ and wiz8hd_ui\ from <HdUi>\dist and
   dgVoodoo.conf from <GameConf>, then writes payload\VERSION.txt with the source commit.
   Run it after rebuilding the mod (wizardry8-hdui: ./build.sh, copy build\wiz8hd.asi to dist\).
 #>
@@ -18,7 +18,7 @@ if (-not (Test-Path (Join-Path $dist 'wiz8hd.asi'))) { throw "No wiz8hd.asi in $
 
 New-Item -ItemType Directory -Force $payload | Out-Null
 Copy-Item (Join-Path $dist 'wiz8hd.asi') $payload -Force
-foreach ($d in 'wiz8hd_fonts', 'wiz8hd_bg') {
+foreach ($d in 'wiz8hd_fonts', 'wiz8hd_bg', 'wiz8hd_ui') {
     $dst = Join-Path $payload $d
     if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
     Copy-Item (Join-Path $dist $d) $dst -Recurse

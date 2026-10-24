@@ -21,6 +21,7 @@ text, an undistorted interface and wide HD backgrounds. One script installs ever
 | Interface | stretched to 16:9, portraits squashed | proportions kept, portraits and panels at the screen edges |
 | Text | 640x480 pixel font, blurry | TrueType font at native resolution, tooltips included |
 | Menu, loading and camp backgrounds | 640x480, stretched | wide 16:9 HD backgrounds |
+| Bands beside the inventory and other 4:3 screens | black | stone panels in the interface's style |
 | 3dfx logo at startup | yes | no |
 
 The "before" pictures are made from the game's own 640x480 interface frame: in the menu it is stretched to 16:9 the
@@ -101,6 +102,7 @@ Running it again updates the installation in place; your `wiz8hd.ini` and `dgVoo
 | Borderless screen, 8x MSAA, 16x anisotropic, no watermark | dgVoodoo2 2.87.5: `DDraw.dll`, `D3DImm.dll`, `dgVoodooCpl.exe`, `dgVoodoo.conf` |
 | HD fonts (Jost), interface at the edges, HD tooltips | `wiz8hd.asi`, `wiz8hd.ini`, `wiz8hd_fonts\` |
 | Wide HD backgrounds | `wiz8hd_bg\` (42 pictures 3840x2160 + 640x480 references for recognizing the screen) |
+| Stone panels instead of black bands beside 4:3 screens (inventory, character, options) | `wiz8hd_ui\side_panel.png` (the game's own stone with carved frames) |
 | No 3dfx logo | registry `HKCU\Software\Zeus Software\nGlide2`, `Splash=0` |
 | Shortcut | "Wizardry 8 (Fan Patch 4K)" on the desktop → `Wiz8_v128.exe` |
 
