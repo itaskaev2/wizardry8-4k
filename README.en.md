@@ -108,8 +108,38 @@ Replaced files are saved in `<game>\_wiz8_4k\backup`, the list is in `_wiz8_4k\m
 `Wiz8.CFG`, `Wiz8.exe` and `Data\` are not touched. No administrator rights needed.
 
 Mod settings are in `wiz8hd.ini` in the game folder: `Aspect`, `Layout` (interface at the edges / 4:3 in the
-centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), `Log`, and the `[Fonts]` section
+centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), `Sprites` (HD pictures), `Log`, and the `[Fonts]` section
 (font and scale for each game font).
+
+## How the mod works
+
+`wiz8hd.asi` is the mod itself: an ordinary 32-bit Windows DLL (about 230 KB) named `.asi` instead of `.dll`.
+Wizardry 8 has no mod loader of its own, but the Miles sound library that ships with the game loads every `*.asi`
+in the game folder at startup. The mod comes in that way and hooks the functions it needs in the memory of
+`Wiz8_v128.exe`; no game files are changed. It checks the exe and turns itself off for anything other than
+Fan Patch 1.28.
+
+In the game it:
+
+- erases the letters the game draws with its bitmap fonts and draws the same text with Jost at full screen
+  resolution (menus, the message log, dialogs, tooltips, Cyrillic included);
+- keeps the 640x480 interface from being stretched on a wide screen: the portrait and bar panels move to the screen
+  edges, and full-screen 2D screens (inventory, character sheet, level-up) stay 4:3 in the centre;
+- replaces the menu, loading and camp pictures with wide HD versions from `wiz8hd_bg\`;
+- with `Sprites=1`, replaces game pictures (STI frames) with HD versions from `wiz8hd_ui\sti\` when they exist.
+
+What sits next to it in the game folder:
+
+| File | What it is |
+|---|---|
+| `wiz8hd.ini` | mod settings |
+| `wiz8hd.log` | the mod's log, for debugging (`Log=1`) |
+| `wiz8hd_fonts\` | Jost fonts |
+| `wiz8hd_bg\` | wide HD backgrounds |
+| `wiz8hd_ui\sti\` | HD pictures (optional) |
+| `wiz8hd.asi.prev*`, `wiz8hd.ini.prev` | backups of earlier versions if the mod was updated by hand; Miles does not load them, it only takes files ending exactly in `.asi` |
+
+To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game is back as it was.
 
 ## For developers
 
