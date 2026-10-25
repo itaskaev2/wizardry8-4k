@@ -7,8 +7,9 @@
     1. 3DVideo.CFG: DirectX7_1 renderer at the display's native resolution, 32-bit.
     2. dgVoodoo2 2.87.5 (DDraw.dll, D3DImm.dll, dgVoodooCpl.exe) + dgVoodoo.conf: fake fullscreen
        (borderless over the whole screen), 16x anisotropic, 8x MSAA, no watermark.
-    3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\: HD TrueType text, HUD at the screen edges,
-       wide HD menu/loading/camp pictures (Miles loads *.asi from the game folder).
+    3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\ + wiz8hd_ui\: HD TrueType text, HUD at the screen
+       edges, wide HD menu/loading/camp pictures, stone beside full-screen screens, HD character portraits
+       (Miles loads *.asi from the game folder).
     4. nGlide: 3dfx splash off (HKCU\Software\Zeus Software\nGlide2 Splash=0).
     5. Desktop shortcut "Wizardry 8 (Fan Patch 4K)" -> Wiz8_v128.exe (Steam's Play button runs the
        original Wiz8.exe 1.2.4, where the mod stays inactive).
@@ -26,6 +27,7 @@ param(
     [int]$Height,
     [switch]$NoHdUi,             # only the 4K/borderless setup, no wiz8hd mod
     [switch]$NoBackgrounds,      # the mod without the HD background pack
+    [switch]$NoPortraits,        # the mod without the HD portraits (wiz8hd_ui\)
     [switch]$ResetConfig,        # overwrite an existing wiz8hd.ini / dgVoodoo.conf with the defaults
     [switch]$NoShortcut,
     [string]$ShortcutDir = [Environment]::GetFolderPath('Desktop'),
@@ -39,6 +41,14 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'scripts\Common.ps1')
 if (-not $NGlideKey) { $NGlideKey = $script:DefaultNGlideKey }
 $payload = Join-Path $PSScriptRoot 'payload'
+
+# The payload folders the mod gets: fonts always, backgrounds and portraits unless switched off (or not shipped).
+function Get-HdDirs {
+    $dirs = @('wiz8hd_fonts')
+    if (-not $NoBackgrounds) { $dirs += 'wiz8hd_bg' }
+    if (-not $NoPortraits -and (Test-Path -LiteralPath (Join-Path $payload 'wiz8hd_ui'))) { $dirs += 'wiz8hd_ui' }
+    return $dirs
+}
 
 # ---------- checks ----------
 Write-Step 'Game folder'
@@ -73,7 +83,7 @@ if ($DetectOnly) { return }
 if (-not $WhatIf) { Assert-GameNotRunning $GamePath }
 
 if (-not $NoHdUi) {
-    $need = @('wiz8hd_fonts'); if (-not $NoBackgrounds) { $need += 'wiz8hd_bg' }
+    $need = @(Get-HdDirs)
     $stubs = @(Get-LfsPointers @($need | ForEach-Object { Join-Path $payload $_ }))
     if ($stubs.Count) {
         Write-Step "Downloading $($stubs.Count) payload files from GitHub (this copy has Git LFS stubs, e.g. from Download ZIP)"
@@ -86,6 +96,22 @@ $m = Read-Manifest $GamePath
 if (-not $m) { $m = New-Manifest $GamePath }
 $m.installed = (Get-Date -Format 's')
 $m.payload = ((Get-Content -LiteralPath (Join-Path $payload 'VERSION.txt') -TotalCount 1) -replace '^wizardry8-hdui: ', '')
+
+# Copy payload\<d> into the game folder with its subfolders; every created folder and file goes into the manifest.
+function Put-Dir([string]$d) {
+    $root = Join-Path $payload $d
+    Ensure-Dir $m $GamePath $d -WhatIf:$WhatIf
+    foreach ($sub in Get-ChildItem -LiteralPath $root -Directory -Recurse) {
+        Ensure-Dir $m $GamePath ($d + $sub.FullName.Substring($root.Length)) -WhatIf:$WhatIf
+    }
+    $files = @(Get-ChildItem -LiteralPath $root -File -Recurse)
+    foreach ($f in $files) {
+        $rel = $d + $f.FullName.Substring($root.Length)
+        Register-Target $m $GamePath $rel -WhatIf:$WhatIf
+        if (-not $WhatIf) { Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $GamePath $rel) -Force }
+    }
+    Write-Info "$d\ ($($files.Count) files)"
+}
 
 function Put-File([string]$src, [string]$rel) {
     Register-Target $m $GamePath $rel -WhatIf:$WhatIf
@@ -153,22 +179,16 @@ try {
     if (-not $NoHdUi) {
         Write-Step 'wiz8hd HD interface'
         Put-File (Join-Path $payload 'wiz8hd.asi') 'wiz8hd.asi'
-        if ((Test-Path -LiteralPath (Join-Path $GamePath 'wiz8hd.ini')) -and -not $ResetConfig) {
+        $gameIni = Join-Path $GamePath 'wiz8hd.ini'
+        if ((Test-Path -LiteralPath $gameIni) -and -not $ResetConfig) {
             Write-Info 'wiz8hd.ini kept (exists; -ResetConfig replaces it)'
+            if (-not $NoPortraits -and (Get-Content -LiteralPath $gameIni) -match '^\s*Sprites\s*=\s*0') {
+                Write-Warn2 'wiz8hd.ini has Sprites=0: the HD portraits stay off. Set Sprites=1 there or run with -ResetConfig.'
+            }
         } else {
             Put-File (Join-Path $payload 'wiz8hd.ini') 'wiz8hd.ini'
         }
-        $dirs = @('wiz8hd_fonts')
-        if (-not $NoBackgrounds) { $dirs += 'wiz8hd_bg' }
-        foreach ($d in $dirs) {
-            Ensure-Dir $m $GamePath $d -WhatIf:$WhatIf
-            $files = Get-ChildItem -LiteralPath (Join-Path $payload $d) -File
-            foreach ($f in $files) {
-                Register-Target $m $GamePath "$d\$($f.Name)" -WhatIf:$WhatIf
-                if (-not $WhatIf) { Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $GamePath "$d\$($f.Name)") -Force }
-            }
-            Write-Info "$d\ ($($files.Count) files)"
-        }
+        foreach ($d in Get-HdDirs) { Put-Dir $d }
     }
 
     # ---------- 4. nGlide splash ----------

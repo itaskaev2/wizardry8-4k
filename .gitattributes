@@ -5,3 +5,4 @@
 payload/** -text
 payload/wiz8hd_bg/** filter=lfs diff=lfs merge=lfs -text
 payload/wiz8hd_fonts/*.ttf filter=lfs diff=lfs merge=lfs -text
+payload/wiz8hd_ui/** filter=lfs diff=lfs merge=lfs -text

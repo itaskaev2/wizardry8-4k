@@ -21,6 +21,8 @@ text, an undistorted interface and wide HD backgrounds. One script installs ever
 | Interface | stretched to 16:9, portraits squashed | proportions kept, portraits and panels at the screen edges |
 | Text | 640x480 pixel font, blurry | TrueType font at native resolution, tooltips included |
 | Menu, loading and camp backgrounds | 640x480, stretched | wide 16:9 HD backgrounds |
+| Character portraits | 640x480, blurry | HD in all three sizes, with blinking and talking |
+| Inventory, party, character creation | black bars at the sides | the game's own stone at the sides |
 | 3dfx logo at startup | yes | no |
 
 The "before" pictures are made from the game's own 640x480 interface frame: in the menu it is stretched to 16:9 the
@@ -87,11 +89,14 @@ From PowerShell: `powershell -ExecutionPolicy Bypass -File .\install.ps1 [option
 | `-DetectOnly` | only find the game and check versions and resolution |
 | `-WhatIf` | show what would be done without changing anything |
 | `-NoBackgrounds` | no HD backgrounds (−71 MB) |
+| `-NoPortraits` | no HD portraits (−119 MB) |
 | `-NoHdUi` | only the resolution and borderless screen, no HD interface |
 | `-ResetConfig` | replace an existing `wiz8hd.ini` / `dgVoodoo.conf` with the defaults |
 | `-NoShortcut`, `-SkipNGlide`, `-Offline` | no shortcut / no nGlide setting / no downloads |
 
-Running it again updates the installation in place; your `wiz8hd.ini` and `dgVoodoo.conf` are kept.
+Running it again updates the installation in place; your `wiz8hd.ini` and `dgVoodoo.conf` are kept. If the kept
+`wiz8hd.ini` has `Sprites=0` (the default before the HD portraits), the installer warns: set `Sprites=1` or run
+with `-ResetConfig`.
 
 ## What exactly changes
 
@@ -101,6 +106,8 @@ Running it again updates the installation in place; your `wiz8hd.ini` and `dgVoo
 | Borderless screen, 8x MSAA, 16x anisotropic, no watermark | dgVoodoo2 2.87.5: `DDraw.dll`, `D3DImm.dll`, `dgVoodooCpl.exe`, `dgVoodoo.conf` |
 | HD fonts (Jost), interface at the edges, HD tooltips | `wiz8hd.asi`, `wiz8hd.ini`, `wiz8hd_fonts\` |
 | Wide HD backgrounds | `wiz8hd_bg\` (42 pictures 3840x2160 + 640x480 references for recognizing the screen) |
+| Stone beside full-screen screens | `wiz8hd_bg\_sides.png` |
+| HD portraits (982 frames: small, medium, large, blinking and talking) | `wiz8hd_ui\sti\PORTRAITS\` |
 | No 3dfx logo | registry `HKCU\Software\Zeus Software\nGlide2`, `Splash=0` |
 | Shortcut | "Wizardry 8 (Fan Patch 4K)" on the desktop → `Wiz8_v128.exe` |
 
@@ -108,7 +115,7 @@ Replaced files are saved in `<game>\_wiz8_4k\backup`, the list is in `_wiz8_4k\m
 `Wiz8.CFG`, `Wiz8.exe` and `Data\` are not touched. No administrator rights needed.
 
 Mod settings are in `wiz8hd.ini` in the game folder: `Aspect`, `Layout` (interface at the edges / 4:3 in the
-centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), `Sprites` (HD pictures), `Log`, and the `[Fonts]` section
+centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), `Sprites` (HD pictures), `Sides` (stone at the sides), `Log`, and the `[Fonts]` section
 (font and scale for each game font).
 
 ## How the mod works
@@ -164,6 +171,8 @@ To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game
   the `.raw` files are copies of the original 640x480 backgrounds the mod uses to recognize the screen. The rights to
   the original pictures belong to the Wizardry 8 rights holder; the backgrounds are published as a fan modification
   for owners of the game and will be removed at the rights holder's first request. Without them: `-NoBackgrounds`.
+- HD portraits: the game's own portraits, upscaled (4xNomos8kDAT, then SUPIR) without painting in new details; shared
+  on the same terms. Without them: `-NoPortraits`.
 - `wiz8hd.asi` — the built mod; its source is in a separate repository, `wizardry8-hdui` (not published yet).
 - Wizardry 8 was developed by Sir-Tech Canada; Wizardry is a trademark of its rights holder. This project is not
   affiliated with the rights holder, Steam or the Fan Patch authors.

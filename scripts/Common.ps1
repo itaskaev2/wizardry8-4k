@@ -30,10 +30,10 @@ function Get-Sha256([string]$path) {
     (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLower()
 }
 
-# GitHub's "Download ZIP" has Git LFS pointer stubs in place of the fonts and backgrounds.
+# GitHub's "Download ZIP" has Git LFS pointer stubs in place of the fonts, backgrounds and portraits.
 function Get-LfsPointers([string[]]$dirs) {
     foreach ($d in $dirs) {
-        foreach ($f in Get-ChildItem -LiteralPath $d -File) {
+        foreach ($f in Get-ChildItem -LiteralPath $d -File -Recurse) {
             if ($f.Length -ge 200) { continue }
             $t = [IO.File]::ReadAllText($f.FullName)
             if ($t -match '^version https://git-lfs\.github\.com/spec/v1\s+oid sha256:([0-9a-f]{64})\s+size (\d+)') {

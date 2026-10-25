@@ -1,4 +1,5 @@
-wizardry8-hdui: 66ad078 README; dist: current asi, Backgrounds and Sprites in the ini
-wiz8hd.asi sha256: 46e7ba560e65a66f7a2fedfce9dfa6c8f8f3dbb585af2369dd0d131b9fa417bd
+wizardry8-hdui: 387adea HD small and large portraits; stone beside full-screen screens
+wiz8hd.asi sha256: 5e739ab2126c928aaa3d0e69c991cf5058678fb8417775c106a491fadd7bb2fd
 backgrounds: 42
-updated: 2026-10-25 15:19
+portraits: 982
+updated: 2026-10-25 20:39
