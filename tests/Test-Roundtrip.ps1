@@ -149,6 +149,25 @@ Check $threw 'no dgVoodoo zip with -Offline: refused'
 Run 'uninstall.ps1' @{ GamePath = $g }
 Check (Same $before (Snapshot $g)) 'failed install rolled back by uninstall'
 
+# ---------- D: Russian translation -> Russian location texts ----------
+Write-Host 'D: game with Data\RUS.SLF -> install (Data\Messages) -> uninstall; without RUS.SLF nothing'
+$g = New-Game 'russian'
+New-Item -ItemType Directory (Join-Path $g 'Data') | Out-Null
+foreach ($f in 'DATA.SLF', 'RUS.SLF', 'FanPatch.Dat') { Copy-Item -LiteralPath (Join-Path $Source "Data\$f") (Join-Path $g 'Data') }
+$before = Snapshot $g
+Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true })
+$msgs = @(Get-ChildItem -LiteralPath (Join-Path $g 'Data\Messages') -Filter *.MSG -ErrorAction SilentlyContinue)
+Check ($msgs.Count -eq 14) "Data\Messages: 14 Russian .MSG files ($($msgs.Count))"
+Check ((Get-Sha256 (Join-Path $g 'Data\Messages\MONASTERY.MSG')) -eq 'dbbc7655cb40cd042bb02b3744445fd6bcac410ea01744fb3a342c44d9e620df') 'MONASTERY.MSG = the Fan Patch Russian texts'
+Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true })
+Check (@((Read-Manifest $g).backedUp).Count -eq 1) 'second install: the .MSG files are not backed up as originals'
+Run 'uninstall.ps1' @{ GamePath = $g }
+Check (Same $before (Snapshot $g)) 'uninstall: Data\Messages removed, folder byte-identical'
+Remove-Item -LiteralPath (Join-Path $g 'Data\RUS.SLF')
+Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true })
+Check (-not (Test-Path -LiteralPath (Join-Path $g 'Data\Messages'))) 'no RUS.SLF: location texts left alone'
+Run 'uninstall.ps1' @{ GamePath = $g }
+
 Check ((Real-State) -eq $realBefore) 'real nGlide key and real Desktop shortcut untouched'
 Remove-Item 'HKCU:\Software\Wiz8_4k_test' -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $work -Recurse -Force

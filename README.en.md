@@ -23,6 +23,7 @@ text, an undistorted interface and wide HD backgrounds. One script installs ever
 | Menu, loading and camp backgrounds | 640x480, stretched | wide 16:9 HD backgrounds |
 | Character portraits | 640x480, blurry | HD in all three sizes, with blinking and talking |
 | Inventory, party, character creation | black bars at the sides | the game's own stone at the sides |
+| Location texts (diaries, signs) in the Russian version | in English | in Russian (Fan Patch texts) |
 | 3dfx logo at startup | yes | no |
 
 The "before" pictures are made from the game's own 640x480 interface frame: in the menu it is stretched to 16:9 the
@@ -90,6 +91,7 @@ From PowerShell: `powershell -ExecutionPolicy Bypass -File .\install.ps1 [option
 | `-WhatIf` | show what would be done without changing anything |
 | `-NoBackgrounds` | no HD backgrounds (−71 MB) |
 | `-NoPortraits` | no HD portraits (−119 MB) |
+| `-NoRusTexts` | keep the location texts in English in a Russian game |
 | `-NoHdUi` | only the resolution and borderless screen, no HD interface |
 | `-ResetConfig` | replace an existing `wiz8hd.ini` / `dgVoodoo.conf` with the defaults |
 | `-NoShortcut`, `-SkipNGlide`, `-Offline` | no shortcut / no nGlide setting / no downloads |
@@ -108,11 +110,12 @@ with `-ResetConfig`.
 | Wide HD backgrounds | `wiz8hd_bg\` (42 pictures 3840x2160 + 640x480 references for recognizing the screen) |
 | Stone beside full-screen screens | `wiz8hd_bg\_sides.png` |
 | HD portraits (982 frames: small, medium, large, blinking and talking) | `wiz8hd_ui\sti\PORTRAITS\` |
+| Russian location texts (only with `Data\RUS.SLF`): diaries, signs, bookshelves | `Data\Messages\*.MSG`, built from the Fan Patch's Russian texts in `Data\FanPatch.Dat` |
 | No 3dfx logo | registry `HKCU\Software\Zeus Software\nGlide2`, `Splash=0` |
 | Shortcut | "Wizardry 8 (Fan Patch 4K)" on the desktop → `Wiz8_v128.exe` |
 
 Replaced files are saved in `<game>\_wiz8_4k\backup`, the list is in `_wiz8_4k\manifest.json`. Saves, `wiz8.ini`,
-`Wiz8.CFG`, `Wiz8.exe` and `Data\` are not touched. No administrator rights needed.
+`Wiz8.CFG`, `Wiz8.exe` and the archives in `Data\` are not touched. No administrator rights needed.
 
 Mod settings are in `wiz8hd.ini` in the game folder: `Aspect`, `Layout` (interface at the edges / 4:3 in the
 centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), `Sprites` (HD pictures), `Sides` (stone at the sides), `Log`, and the `[Fonts]` section

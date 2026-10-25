@@ -10,6 +10,8 @@
     3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\ + wiz8hd_ui\: HD TrueType text, HUD at the screen
        edges, wide HD menu/loading/camp pictures, stone beside full-screen screens, HD character portraits
        (Miles loads *.asi from the game folder).
+    3b. A game with a Russian translation (Data\RUS.SLF) gets its location texts (diaries, signs) in Russian:
+       Data\Messages\*.MSG made from the Fan Patch's own Russian copies in Data\FanPatch.Dat.
     4. nGlide: 3dfx splash off (HKCU\Software\Zeus Software\nGlide2 Splash=0).
     5. Desktop shortcut "Wizardry 8 (Fan Patch 4K)" -> Wiz8_v128.exe (Steam's Play button runs the
        original Wiz8.exe 1.2.4, where the mod stays inactive).
@@ -28,6 +30,7 @@ param(
     [switch]$NoHdUi,             # only the 4K/borderless setup, no wiz8hd mod
     [switch]$NoBackgrounds,      # the mod without the HD background pack
     [switch]$NoPortraits,        # the mod without the HD portraits (wiz8hd_ui\)
+    [switch]$NoRusTexts,         # keep the English location texts in a Russian game (no Data\Messages\*.MSG)
     [switch]$ResetConfig,        # overwrite an existing wiz8hd.ini / dgVoodoo.conf with the defaults
     [switch]$NoShortcut,
     [string]$ShortcutDir = [Environment]::GetFolderPath('Desktop'),
@@ -39,6 +42,7 @@ param(
 )
 $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'scripts\Common.ps1')
+. (Join-Path $PSScriptRoot 'scripts\RusMessages.ps1')
 if (-not $NGlideKey) { $NGlideKey = $script:DefaultNGlideKey }
 $payload = Join-Path $PSScriptRoot 'payload'
 
@@ -189,6 +193,21 @@ try {
             Put-File (Join-Path $payload 'wiz8hd.ini') 'wiz8hd.ini'
         }
         foreach ($d in Get-HdDirs) { Put-Dir $d }
+    }
+
+    # ---------- 3b. Russian location texts ----------
+    if (-not $NoRusTexts) {
+        $msgs = Get-RusMessages $GamePath
+        if ($msgs -and $msgs.Count) {
+            Write-Step 'Russian location texts (Data\RUS.SLF found)'
+            Ensure-Dir $m $GamePath 'Data\Messages' -WhatIf:$WhatIf
+            foreach ($level in $msgs.Keys) {
+                $rel = "Data\Messages\$level.MSG"
+                Register-Target $m $GamePath $rel -WhatIf:$WhatIf
+                if (-not $WhatIf) { [IO.File]::WriteAllBytes((Join-Path $GamePath $rel), $msgs[$level]) }
+            }
+            Write-Info "Data\Messages\ ($($msgs.Count) files, from Data\FanPatch.Dat)"
+        }
     }
 
     # ---------- 4. nGlide splash ----------

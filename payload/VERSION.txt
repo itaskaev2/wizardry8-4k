@@ -1,5 +1,5 @@
-wizardry8-hdui: 3557ead Fix crash on level change; HD portraits darkened in combat
-wiz8hd.asi sha256: 7610344aa4fac4d55eb5f0e4d307e104dc19ef5e116db49a5bc5754a5aedcda4
+wizardry8-hdui: 16bcc80 Add rus_messages.py: Russian location texts from the Fan Patch
+wiz8hd.asi sha256: 2f8df24be641dc0e1159ba9e4078f42c90cfb3c025168544e7fbde4cd861b709
 backgrounds: 42
 portraits: 982
-updated: 2026-10-25 21:22
+updated: 2026-10-25 22:45
