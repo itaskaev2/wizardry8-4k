@@ -1,5 +1,5 @@
-wizardry8-hdui: 9e56c5f side_tile.py: keep the game tile's average colour
-wiz8hd.asi sha256: 5e739ab2126c928aaa3d0e69c991cf5058678fb8417775c106a491fadd7bb2fd
+wizardry8-hdui: 3557ead Fix crash on level change; HD portraits darkened in combat
+wiz8hd.asi sha256: 7610344aa4fac4d55eb5f0e4d307e104dc19ef5e116db49a5bc5754a5aedcda4
 backgrounds: 42
 portraits: 982
-updated: 2026-10-25 21:02
+updated: 2026-10-25 21:22
