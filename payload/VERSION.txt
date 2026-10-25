@@ -1,5 +1,5 @@
-wizardry8-hdui: 387adea HD small and large portraits; stone beside full-screen screens
+wizardry8-hdui: 9e56c5f side_tile.py: keep the game tile's average colour
 wiz8hd.asi sha256: 5e739ab2126c928aaa3d0e69c991cf5058678fb8417775c106a491fadd7bb2fd
 backgrounds: 42
 portraits: 982
-updated: 2026-10-25 20:39
+updated: 2026-10-25 21:02
