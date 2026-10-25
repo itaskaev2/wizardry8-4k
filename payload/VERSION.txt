@@ -1,4 +1,4 @@
-wizardry8-hdui: bb99a47 Remove side panels
-wiz8hd.asi sha256: bf1cfae57a0e80b88239d5a1372f798eb40bc3068fd24344eac910b1ebb2ba69
+wizardry8-hdui: 66ad078 README; dist: current asi, Backgrounds and Sprites in the ini
+wiz8hd.asi sha256: 46e7ba560e65a66f7a2fedfce9dfa6c8f8f3dbb585af2369dd0d131b9fa417bd
 backgrounds: 42
-updated: 2026-10-24 18:29
+updated: 2026-10-25 15:19
