@@ -8,8 +8,8 @@
     2. dgVoodoo2 2.87.5 (DDraw.dll, D3DImm.dll, dgVoodooCpl.exe) + dgVoodoo.conf: fake fullscreen
        (borderless over the whole screen), 16x anisotropic, 8x MSAA, no watermark.
     3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\ + wiz8hd_ui\: HD TrueType text, HUD at the screen
-       edges, wide HD menu/loading/camp pictures, stone beside full-screen screens, HD character portraits
-       (Miles loads *.asi from the game folder).
+       edges, wide HD menu/loading/camp pictures, stone beside full-screen screens, HD character portraits and
+       HD interface pictures (Miles loads *.asi from the game folder).
     3b. A game with a Russian translation (Data\RUS.SLF) gets its location texts (diaries, signs) in Russian:
        Data\Messages\*.MSG made from the Fan Patch's own Russian copies in Data\FanPatch.Dat.
     4. nGlide: 3dfx splash off (HKCU\Software\Zeus Software\nGlide2 Splash=0).
@@ -29,7 +29,8 @@ param(
     [int]$Height,
     [switch]$NoHdUi,             # only the 4K/borderless setup, no wiz8hd mod
     [switch]$NoBackgrounds,      # the mod without the HD background pack
-    [switch]$NoPortraits,        # the mod without the HD portraits (wiz8hd_ui\)
+    [switch]$NoPortraits,        # the mod without the HD portraits (wiz8hd_ui\sti\PORTRAITS\)
+    [switch]$NoInterface,        # the mod without the HD interface pictures (the rest of wiz8hd_ui\sti\)
     [switch]$NoRusTexts,         # keep the English location texts in a Russian game (no Data\Messages\*.MSG)
     [switch]$ResetConfig,        # overwrite an existing wiz8hd.ini / dgVoodoo.conf with the defaults
     [switch]$NoShortcut,
@@ -46,11 +47,18 @@ $ErrorActionPreference = 'Stop'
 if (-not $NGlideKey) { $NGlideKey = $script:DefaultNGlideKey }
 $payload = Join-Path $PSScriptRoot 'payload'
 
-# The payload folders the mod gets: fonts always, backgrounds and portraits unless switched off (or not shipped).
+# The payload folders the mod gets: fonts always; backgrounds, portraits and interface pictures (one folder per
+# STI folder under wiz8hd_ui\sti\) unless switched off or not shipped.
 function Get-HdDirs {
     $dirs = @('wiz8hd_fonts')
     if (-not $NoBackgrounds) { $dirs += 'wiz8hd_bg' }
-    if (-not $NoPortraits -and (Test-Path -LiteralPath (Join-Path $payload 'wiz8hd_ui'))) { $dirs += 'wiz8hd_ui' }
+    $sti = Join-Path $payload 'wiz8hd_ui\sti'
+    if (Test-Path -LiteralPath $sti) {
+        foreach ($s in Get-ChildItem -LiteralPath $sti -Directory | Sort-Object Name) {
+            $want = if ($s.Name -eq 'PORTRAITS') { -not $NoPortraits } else { -not $NoInterface }
+            if ($want) { $dirs += "wiz8hd_ui\sti\$($s.Name)" }
+        }
+    }
     return $dirs
 }
 
@@ -104,6 +112,8 @@ $m.payload = ((Get-Content -LiteralPath (Join-Path $payload 'VERSION.txt') -Tota
 # Copy payload\<d> into the game folder with its subfolders; every created folder and file goes into the manifest.
 function Put-Dir([string]$d) {
     $root = Join-Path $payload $d
+    $parts = $d -split '\\'
+    for ($i = 1; $i -lt $parts.Count; $i++) { Ensure-Dir $m $GamePath ($parts[0..($i - 1)] -join '\') -WhatIf:$WhatIf }
     Ensure-Dir $m $GamePath $d -WhatIf:$WhatIf
     foreach ($sub in Get-ChildItem -LiteralPath $root -Directory -Recurse) {
         Ensure-Dir $m $GamePath ($d + $sub.FullName.Substring($root.Length)) -WhatIf:$WhatIf
@@ -186,8 +196,8 @@ try {
         $gameIni = Join-Path $GamePath 'wiz8hd.ini'
         if ((Test-Path -LiteralPath $gameIni) -and -not $ResetConfig) {
             Write-Info 'wiz8hd.ini kept (exists; -ResetConfig replaces it)'
-            if (-not $NoPortraits -and (Get-Content -LiteralPath $gameIni) -match '^\s*Sprites\s*=\s*0') {
-                Write-Warn2 'wiz8hd.ini has Sprites=0: the HD portraits stay off. Set Sprites=1 there or run with -ResetConfig.'
+            if (-not ($NoPortraits -and $NoInterface) -and (Get-Content -LiteralPath $gameIni) -match '^\s*Sprites\s*=\s*0') {
+                Write-Warn2 'wiz8hd.ini has Sprites=0: the HD portraits and interface pictures stay off. Set Sprites=1 there or run with -ResetConfig.'
             }
         } else {
             Put-File (Join-Path $payload 'wiz8hd.ini') 'wiz8hd.ini'

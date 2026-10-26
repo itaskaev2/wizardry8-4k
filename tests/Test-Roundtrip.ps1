@@ -168,6 +168,20 @@ Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true })
 Check (-not (Test-Path -LiteralPath (Join-Path $g 'Data\Messages'))) 'no RUS.SLF: location texts left alone'
 Run 'uninstall.ps1' @{ GamePath = $g }
 
+# ---------- E: portraits and interface pictures switched off one at a time ----------
+Write-Host 'E: -NoInterface keeps the portraits, -NoPortraits keeps the interface pictures'
+$g = New-Game 'parts'
+$before = Snapshot $g
+$sti = Join-Path $g 'wiz8hd_ui\sti'
+Run 'install.ps1' ($common + @{ GamePath = $g; NoInterface = $true; NoBackgrounds = $true })
+Check ((Test-Path -LiteralPath (Join-Path $sti 'PORTRAITS')) -and -not (Test-Path -LiteralPath (Join-Path $sti 'MAIN INTERFACE'))) '-NoInterface: portraits only'
+Run 'uninstall.ps1' @{ GamePath = $g }
+Check (Same $before (Snapshot $g)) '-NoInterface: uninstall byte-identical'
+Run 'install.ps1' ($common + @{ GamePath = $g; NoPortraits = $true; NoBackgrounds = $true })
+Check ((Test-Path -LiteralPath (Join-Path $sti 'MAIN INTERFACE')) -and -not (Test-Path -LiteralPath (Join-Path $sti 'PORTRAITS'))) '-NoPortraits: interface pictures only'
+Run 'uninstall.ps1' @{ GamePath = $g }
+Check (Same $before (Snapshot $g)) '-NoPortraits: uninstall byte-identical (wiz8hd_ui\ removed too)'
+
 Check ((Real-State) -eq $realBefore) 'real nGlide key and real Desktop shortcut untouched'
 Remove-Item 'HKCU:\Software\Wiz8_4k_test' -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $work -Recurse -Force

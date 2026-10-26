@@ -1,5 +1,6 @@
-wizardry8-hdui: 16bcc80 Add rus_messages.py: Russian location texts from the Fan Patch
-wiz8hd.asi sha256: 2f8df24be641dc0e1159ba9e4078f42c90cfb3c025168544e7fbde4cd861b709
+wizardry8-hdui: f1df029 Add xBR interface scaler and the engine test tools
+wiz8hd.asi sha256: 1ff168091d8d3a89c30c0dfb898c5f6e36fb6672eda149698732bd4fd03f6401
 backgrounds: 42
 portraits: 982
-updated: 2026-10-25 22:45
+interface pictures: 4765
+updated: 2026-10-26 13:57
