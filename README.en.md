@@ -13,6 +13,28 @@ text, an undistorted interface and wide HD backgrounds. One script installs ever
 
 ![Text close-up, 4K pixels 1:1](docs/compare_text_en.jpg)
 
+### More examples
+
+Left: the game at 4K without the mod; right: with the mod. Same place, same party.
+
+![Inventory: before and after](docs/compare_inventory_en.jpg)
+
+![Character sheet, skills: before and after](docs/compare_skills_en.jpg)
+
+![Spell panel: before and after](docs/compare_spells_en.jpg)
+
+![Automap: before and after](docs/compare_map_en.jpg)
+
+![Camp: before and after](docs/compare_rest_en.jpg)
+
+![Combat: before and after](docs/compare_battle_en.jpg)
+
+Close-ups, 4K pixels 1:1:
+
+![Inventory items close-up](docs/compare_items_en.jpg)
+
+![Portrait column close-up](docs/compare_portraits_en.jpg)
+
 | | Steam version as is | After installing |
 |---|---|---|
 | Resolution | 800x600, 16-bit (Glide through nGlide) | your monitor's native resolution, 32-bit (DirectX through dgVoodoo2) |
@@ -22,6 +44,7 @@ text, an undistorted interface and wide HD backgrounds. One script installs ever
 | Text | 640x480 pixel font, blurry | TrueType font at native resolution, tooltips included |
 | Menu, loading and camp backgrounds | 640x480, stretched | wide 16:9 HD backgrounds |
 | Character portraits | 640x480, blurry | HD in all three sizes, with blinking and talking |
+| Frames, buttons, icons, items, spells, automap | 640x480, blurry | HD pictures (classic xBR pixel-art scaler, no AI) |
 | Inventory, party, character creation | black bars at the sides | the game's own stone at the sides |
 | Location texts (diaries, signs) in the Russian version | in English | in Russian (Fan Patch texts) |
 | 3dfx logo at startup | yes | no |
@@ -36,7 +59,7 @@ screenshots were taken with the Russian game language; the mod works with any la
 - Wizardry 8 from Steam.
 - **Fan Patch 1.28**, an unofficial community patch. Steam does not include it; download it separately (step 2).
 - **dgVoodoo2**. Steam does not include it either; the installer downloads it for you (step 4).
-- An internet connection during installation and about 80 MB of disk space.
+- An internet connection during installation and about 450 MB of disk space.
 
 ## Installation
 
@@ -90,7 +113,8 @@ From PowerShell: `powershell -ExecutionPolicy Bypass -File .\install.ps1 [option
 | `-DetectOnly` | only find the game and check versions and resolution |
 | `-WhatIf` | show what would be done without changing anything |
 | `-NoBackgrounds` | no HD backgrounds (−71 MB) |
-| `-NoPortraits` | no HD portraits (−119 MB) |
+| `-NoPortraits` | no HD portraits (−116 MB) |
+| `-NoInterface` | no HD interface pictures: frames, buttons, icons, items (−258 MB) |
 | `-NoRusTexts` | keep the location texts in English in a Russian game |
 | `-NoHdUi` | only the resolution and borderless screen, no HD interface |
 | `-ResetConfig` | replace an existing `wiz8hd.ini` / `dgVoodoo.conf` with the defaults |
@@ -110,6 +134,7 @@ with `-ResetConfig`.
 | Wide HD backgrounds | `wiz8hd_bg\` (42 pictures 3840x2160 + 640x480 references for recognizing the screen) |
 | Stone beside full-screen screens | `wiz8hd_bg\_sides.png` |
 | HD portraits (982 frames: small, medium, large, blinking and talking) | `wiz8hd_ui\sti\PORTRAITS\` |
+| HD interface pictures (4765 frames: frames, buttons, icons, items, spells, automap, character creation) | the other folders of `wiz8hd_ui\sti\` |
 | Russian location texts (only with `Data\RUS.SLF`): diaries, signs, bookshelves | `Data\Messages\*.MSG`, built from the Fan Patch's Russian texts in `Data\FanPatch.Dat` |
 | No 3dfx logo | registry `HKCU\Software\Zeus Software\nGlide2`, `Splash=0` |
 | Shortcut | "Wizardry 8 (Fan Patch 4K)" on the desktop → `Wiz8_v128.exe` |
@@ -163,7 +188,8 @@ To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game
   menu, world, byte-for-byte uninstall.
 - `tools\Update-Payload.ps1` refreshes `payload\` after rebuilding the mod (`wizardry8-hdui`: `./build.sh`,
   `build\wiz8hd.asi` → `dist\`). Pictures and fonts are stored in Git LFS.
-- `tools\make_compare.py <wizardry8-hdui>\shots` builds the before/after pictures in `docs\` (Russian and English).
+- `tools\make_compare.py <wizardry8-hdui>\shots` builds the before/after pictures in `docs\` (Russian and English);
+  the `ex_off_*` / `ex_on_*` shots come from `tools/shoot_examples.sh off|on` in `wizardry8-hdui`.
 
 ## Licenses and origin
 
@@ -176,6 +202,10 @@ To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game
   for owners of the game and will be removed at the rights holder's first request. Without them: `-NoBackgrounds`.
 - HD portraits: the game's own portraits, upscaled (4xNomos8kDAT, then SUPIR) without painting in new details; shared
   on the same terms. Without them: `-NoPortraits`.
+- HD interface pictures: the game's own pictures, upscaled with the classic pixel-art scaler xBR (an ffmpeg filter,
+  no neural networks); the dark edge they were anti-aliased with against black is partly turned into
+  transparency. Shared on the same terms. Without them: `-NoInterface`. The Russian captions on the options menu
+  buttons stay original.
 - `wiz8hd.asi` — the built mod; its source is in a separate repository, `wizardry8-hdui` (not published yet).
 - Wizardry 8 was developed by Sir-Tech Canada; Wizardry is a trademark of its rights holder. This project is not
   affiliated with the rights holder, Steam or the Fan Patch authors.
