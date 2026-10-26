@@ -72,7 +72,7 @@ SCREENS = {
     "": {
         "inventory": ("До: инвентарь растянут на 16:9", "После: 4:3 по центру, камень по бокам, всё в HD"),
         "skills": ("До: лист персонажа, пиксельный шрифт", "После: навыки, HD-шрифт и HD-рамки"),
-        "spells": ("До: панель заклинаний", "После: панель заклинаний в HD, HUD по краям"),
+        "spells": ("До: панель заклинаний", "После: панель заклинаний в HD, камень по бокам"),
         "map": ("До: карта растянута", "После: карта 4:3, HD-кнопки"),
         "rest": ("До: привал", "После: HD-фон привала, спящие HD-портреты"),
         "battle": ("До: бой с крабами", "После: тот же бой"),
@@ -82,7 +82,7 @@ SCREENS = {
     "_en": {
         "inventory": ("Before: inventory stretched to 16:9", "After: 4:3 in the middle, stone beside, all HD"),
         "skills": ("Before: character sheet, pixel font", "After: skills with HD font and frames"),
-        "spells": ("Before: spell panel", "After: HD spell panel, HUD at the edges"),
+        "spells": ("Before: spell panel", "After: HD spell panel, stone beside it"),
         "map": ("Before: automap stretched", "After: 4:3 automap, HD buttons"),
         "rest": ("Before: camp", "After: HD camp picture, sleeping HD portraits"),
         "battle": ("Before: a fight with crabs", "After: the same fight"),

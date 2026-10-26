@@ -1,6 +1,6 @@
-wizardry8-hdui: f1df029 Add xBR interface scaler and the engine test tools
-wiz8hd.asi sha256: 1ff168091d8d3a89c30c0dfb898c5f6e36fb6672eda149698732bd4fd03f6401
+wizardry8-hdui: 7eb568d HD stone beside full-width bottom panels
+wiz8hd.asi sha256: 2f2bcb88dc060968cc01576448806b7227dbae442407b1073d60a167440cb097
 backgrounds: 42
 portraits: 982
 interface pictures: 4765
-updated: 2026-10-26 13:57
+updated: 2026-10-26 15:03

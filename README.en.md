@@ -45,7 +45,7 @@ Close-ups, 4K pixels 1:1:
 | Menu, loading and camp backgrounds | 640x480, stretched | wide 16:9 HD backgrounds |
 | Character portraits | 640x480, blurry | HD in all three sizes, with blinking and talking |
 | Frames, buttons, icons, items, spells, automap | 640x480, blurry | HD pictures (classic xBR pixel-art scaler, no AI) |
-| Inventory, party, character creation | black bars at the sides | the game's own stone at the sides |
+| Inventory, party, character creation, spell panel | black bars or a stretched edge at the sides | the game's own stone at the sides, in HD |
 | Location texts (diaries, signs) in the Russian version | in English | in Russian (Fan Patch texts) |
 | 3dfx logo at startup | yes | no |
 
