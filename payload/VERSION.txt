@@ -1,6 +1,7 @@
-wizardry8-hdui: 0e6ed33 Leave the game's font icons to the game
+wizardry8-hdui: cc22529 HD menu captions per language (main menu, options, save/load)
 wiz8hd.asi sha256: a7997c75d961c6328c931c68c787ba8423c86b3cffab87c13eb8db44e67bf77f
 backgrounds: 42
 portraits: 982
 interface pictures: 4765
-updated: 2026-10-26 15:15
+captions: rus 62, eng 62
+updated: 2026-10-26 15:38

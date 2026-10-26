@@ -35,6 +35,12 @@ Close-ups, 4K pixels 1:1:
 
 ![Portrait column close-up](docs/compare_portraits_en.jpg)
 
+Menu captions (left: with the mod, but the captions still the game's own):
+
+![Main menu captions close-up](docs/compare_captions_en.jpg)
+
+![Options buttons close-up](docs/compare_buttons_en.jpg)
+
 | | Steam version as is | After installing |
 |---|---|---|
 | Resolution | 800x600, 16-bit (Glide through nGlide) | your monitor's native resolution, 32-bit (DirectX through dgVoodoo2) |
@@ -45,6 +51,7 @@ Close-ups, 4K pixels 1:1:
 | Menu, loading and camp backgrounds | 640x480, stretched | wide 16:9 HD backgrounds |
 | Character portraits | 640x480, blurry | HD in all three sizes, with blinking and talking |
 | Frames, buttons, icons, items, spells, automap | 640x480, blurry | HD pictures (classic xBR pixel-art scaler, no AI) |
+| Main menu captions, options and save/load buttons | 640x480, blurry | HD, in the game's language (Russian or English) |
 | Inventory, party, character creation, spell panel | black bars or a stretched edge at the sides | the game's own stone at the sides, in HD |
 | Location texts (diaries, signs) in the Russian version | in English | in Russian (Fan Patch texts) |
 | 3dfx logo at startup | yes | no |
@@ -114,7 +121,7 @@ From PowerShell: `powershell -ExecutionPolicy Bypass -File .\install.ps1 [option
 | `-WhatIf` | show what would be done without changing anything |
 | `-NoBackgrounds` | no HD backgrounds (−71 MB) |
 | `-NoPortraits` | no HD portraits (−116 MB) |
-| `-NoInterface` | no HD interface pictures: frames, buttons, icons, items (−258 MB) |
+| `-NoInterface` | no HD interface pictures or menu captions: frames, buttons, icons, items (−258 MB) |
 | `-NoRusTexts` | keep the location texts in English in a Russian game |
 | `-NoHdUi` | only the resolution and borderless screen, no HD interface |
 | `-ResetConfig` | replace an existing `wiz8hd.ini` / `dgVoodoo.conf` with the defaults |
@@ -135,6 +142,7 @@ with `-ResetConfig`.
 | Stone beside full-screen screens | `wiz8hd_bg\_sides.png` |
 | HD portraits (982 frames: small, medium, large, blinking and talking) | `wiz8hd_ui\sti\PORTRAITS\` |
 | HD interface pictures (4765 frames: frames, buttons, icons, items, spells, automap, character creation) | the other folders of `wiz8hd_ui\sti\` |
+| HD menu captions (62 frames: main menu, options, save/load buttons) in the game's language: Russian when `Data\RUS.SLF` is there, English otherwise | `wiz8hd_ui\sti\OPTIONS\` (from `payload\wiz8hd_ui\captions\rus` or `eng`) |
 | Russian location texts (only with `Data\RUS.SLF`): diaries, signs, bookshelves | `Data\Messages\*.MSG`, built from the Fan Patch's Russian texts in `Data\FanPatch.Dat` |
 | No 3dfx logo | registry `HKCU\Software\Zeus Software\nGlide2`, `Splash=0` |
 | Shortcut | "Wizardry 8 (Fan Patch 4K)" on the desktop → `Wiz8_v128.exe` |
@@ -204,8 +212,9 @@ To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game
   on the same terms. Without them: `-NoPortraits`.
 - HD interface pictures: the game's own pictures, upscaled with the classic pixel-art scaler xBR (an ffmpeg filter,
   no neural networks); the dark edge they were anti-aliased with against black is partly turned into
-  transparency. Shared on the same terms. Without them: `-NoInterface`. The Russian captions on the options menu
-  buttons stay original.
+  transparency. Shared on the same terms. Without them: `-NoInterface`. The pictures with words on them (main menu,
+  options buttons) are made separately from the Russian (`RUS.SLF`) and English (`DATA.SLF`) originals; the main
+  menu captions are cut out of their old 640x480 background, so the wide HD picture shows under them.
 - `wiz8hd.asi` — the built mod; its source is in a separate repository, `wizardry8-hdui` (not published yet).
 - Wizardry 8 was developed by Sir-Tech Canada; Wizardry is a trademark of its rights holder. This project is not
   affiliated with the rights holder, Steam or the Fan Patch authors.

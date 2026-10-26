@@ -79,7 +79,7 @@ Check ((Get-Sha256 (Join-Path $g 'dgVoodooCpl.exe')) -eq '87fb878166dcaef3e75ff1
 foreach ($f in 'dgVoodoo.conf', 'wiz8hd.asi', 'wiz8hd.ini') {
     Check ((Get-Sha256 (Join-Path $g $f)) -eq (Get-Sha256 (Join-Path $payload $f))) "$f = payload"
 }
-foreach ($d in 'wiz8hd_fonts', 'wiz8hd_bg', 'wiz8hd_ui') {
+foreach ($d in 'wiz8hd_fonts', 'wiz8hd_bg', 'wiz8hd_ui\sti') {
     $root = Join-Path $payload $d
     $p = @(Get-ChildItem -LiteralPath $root -File -Recurse)
     $bad = @($p | Where-Object { $rel = $d + $_.FullName.Substring($root.Length)
@@ -181,6 +181,27 @@ Run 'install.ps1' ($common + @{ GamePath = $g; NoPortraits = $true; NoBackground
 Check ((Test-Path -LiteralPath (Join-Path $sti 'MAIN INTERFACE')) -and -not (Test-Path -LiteralPath (Join-Path $sti 'PORTRAITS'))) '-NoPortraits: interface pictures only'
 Run 'uninstall.ps1' @{ GamePath = $g }
 Check (Same $before (Snapshot $g)) '-NoPortraits: uninstall byte-identical (wiz8hd_ui\ removed too)'
+
+# ---------- F: menu captions in the game's language ----------
+Write-Host 'F: menu captions: Russian with Data\RUS.SLF, English without'
+$g = New-Game 'captions'
+New-Item -ItemType Directory (Join-Path $g 'Data') | Out-Null
+Copy-Item -LiteralPath (Join-Path $Source 'Data\RUS.SLF') (Join-Path $g 'Data')
+$before = Snapshot $g
+$cap = 'OPTIONS\INTROTEXT_NORMAL_000.png'
+$inGame = Join-Path $g "wiz8hd_ui\sti\$cap"
+foreach ($lang in 'rus', 'eng') {
+    if ($lang -eq 'eng') {
+        Remove-Item -LiteralPath (Join-Path $g 'Data\RUS.SLF')
+        $before = Snapshot $g
+    }
+    Run 'install.ps1' ($common + @{ GamePath = $g; NoPortraits = $true; NoBackgrounds = $true; NoRusTexts = $true })
+    $want = Get-Sha256 (Join-Path $payload "wiz8hd_ui\captions\$lang\$cap")
+    $n = @(Get-ChildItem -LiteralPath (Join-Path $payload "wiz8hd_ui\captions\$lang") -Recurse -File).Count
+    Check ((Test-Path -LiteralPath $inGame) -and (Get-Sha256 $inGame) -eq $want) "$lang`: the $lang captions ($n files)"
+    Run 'uninstall.ps1' @{ GamePath = $g }
+    Check (Same $before (Snapshot $g)) "$lang`: uninstall byte-identical"
+}
 
 Check ((Real-State) -eq $realBefore) 'real nGlide key and real Desktop shortcut untouched'
 Remove-Item 'HKCU:\Software\Wiz8_4k_test' -Recurse -Force -ErrorAction SilentlyContinue

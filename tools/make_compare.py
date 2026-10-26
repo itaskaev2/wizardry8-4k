@@ -78,6 +78,8 @@ SCREENS = {
         "battle": ("До: бой с крабами", "После: тот же бой"),
         "items": ("До: предметы 640x480, увеличены до 4K", "После: предметы в HD (xBR), пиксели 4K 1:1"),
         "portraits": ("До: колонка портретов", "После: HD-портреты, рамки и полоски"),
+        "captions": ("До: надписи главного меню из игры", "После: надписи в HD (xBR), под ними HD-фон"),
+        "buttons": ("До: кнопки настроек из игры", "После: кнопки в HD (xBR)"),
     },
     "_en": {
         "inventory": ("Before: inventory stretched to 16:9", "After: 4:3 in the middle, stone beside, all HD"),
@@ -88,13 +90,15 @@ SCREENS = {
         "battle": ("Before: a fight with crabs", "After: the same fight"),
         "items": ("Before: items, 640x480 scaled to 4K", "After: HD items (xBR), 4K pixels 1:1"),
         "portraits": ("Before: the portrait column", "After: HD portraits, frames and bars"),
+        "captions": ("Before: the game's main menu captions", "After: HD captions (xBR) over the HD picture"),
+        "buttons": ("Before: the game's options buttons", "After: HD buttons (xBR)"),
     },
 }
 SHOT = {"inventory": "inv", "skills": "skills", "spells": "spells", "map": "map", "rest": "rest", "battle": "battle"}
 box = (1300, 1560, 2600, 2160)
 for sfx, t in LABELS.items():
     # menu: without the mod the game's own 640x480 frame is stretched over the 16:9 screen
-    pair((shot("menu2d_2d.png"), t[0]), (shot("fin_menu.jpg"), t[1]), f"compare_menu{sfx}.jpg", (1280, 720))
+    pair((shot("menu2d_2d.png"), t[0]), (shot("cap2_menu.jpg"), t[1]), f"compare_menu{sfx}.jpg", (1280, 720))
     # world: same place, same party
     pair((shot("ex_off_hud.jpg"), t[2]), (shot("ex_on_hud.jpg"), t[3]), f"compare_game{sfx}.jpg", (1280, 720))
     # text close-up at native 4K pixels
@@ -109,3 +113,8 @@ for sfx, t in LABELS.items():
               s["items"], 640)
     crop_pair("ex_off_hud.jpg", "ex_on_hud.jpg", (0, 100, 128, 358), "stretch", "left", f"compare_portraits{sfx}.jpg",
               s["portraits"], 900)
+    # captions with words on them, with the mod both times (cap_* before the HD captions, cap2_* with them)
+    crop_pair("cap_menu.jpg", "cap2_menu.jpg", (115, 133, 382, 300), "center", "center", f"compare_captions{sfx}.jpg",
+              s["captions"], 700)
+    crop_pair("cap_load.jpg", "cap2_load.jpg", (0, 289, 160, 478), "center", "center", f"compare_buttons{sfx}.jpg",
+              s["buttons"], 760)

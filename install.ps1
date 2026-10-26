@@ -9,7 +9,7 @@
        (borderless over the whole screen), 16x anisotropic, 8x MSAA, no watermark.
     3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\ + wiz8hd_ui\: HD TrueType text, HUD at the screen
        edges, wide HD menu/loading/camp pictures, stone beside full-screen screens, HD character portraits and
-       HD interface pictures (Miles loads *.asi from the game folder).
+       HD interface pictures, the menu captions in the game's language (Miles loads *.asi from the game folder).
     3b. A game with a Russian translation (Data\RUS.SLF) gets its location texts (diaries, signs) in Russian:
        Data\Messages\*.MSG made from the Fan Patch's own Russian copies in Data\FanPatch.Dat.
     4. nGlide: 3dfx splash off (HKCU\Software\Zeus Software\nGlide2 Splash=0).
@@ -62,6 +62,17 @@ function Get-HdDirs {
     return $dirs
 }
 
+# Pictures with words on them (main menu items, options and save/load buttons) come per language: a game with the
+# Russian translation (Data\RUS.SLF) takes its own Russian ones, any other the English ones. They go into
+# wiz8hd_ui\sti\ with the interface pictures. $null when off or not shipped.
+function Get-CaptionDir {
+    if ($NoInterface) { return $null }
+    $lang = if (Test-Path -LiteralPath (Join-Path $GamePath 'Data\RUS.SLF')) { 'rus' } else { 'eng' }
+    $d = "wiz8hd_ui\captions\$lang"
+    if (Test-Path -LiteralPath (Join-Path $payload $d)) { return $d }
+    return $null
+}
+
 # ---------- checks ----------
 Write-Step 'Game folder'
 $GamePath = Resolve-GamePath $GamePath
@@ -95,7 +106,7 @@ if ($DetectOnly) { return }
 if (-not $WhatIf) { Assert-GameNotRunning $GamePath }
 
 if (-not $NoHdUi) {
-    $need = @(Get-HdDirs)
+    $need = @(Get-HdDirs) + @(Get-CaptionDir | Where-Object { $_ })
     $stubs = @(Get-LfsPointers @($need | ForEach-Object { Join-Path $payload $_ }))
     if ($stubs.Count) {
         Write-Step "Downloading $($stubs.Count) payload files from GitHub (this copy has Git LFS stubs, e.g. from Download ZIP)"
@@ -109,22 +120,23 @@ if (-not $m) { $m = New-Manifest $GamePath }
 $m.installed = (Get-Date -Format 's')
 $m.payload = ((Get-Content -LiteralPath (Join-Path $payload 'VERSION.txt') -TotalCount 1) -replace '^wizardry8-hdui: ', '')
 
-# Copy payload\<d> into the game folder with its subfolders; every created folder and file goes into the manifest.
-function Put-Dir([string]$d) {
+# Copy payload\<d> into the game folder (into <to>, default the same path) with its subfolders; every created
+# folder and file goes into the manifest.
+function Put-Dir([string]$d, [string]$to = $d) {
     $root = Join-Path $payload $d
-    $parts = $d -split '\\'
+    $parts = $to -split '\\'
     for ($i = 1; $i -lt $parts.Count; $i++) { Ensure-Dir $m $GamePath ($parts[0..($i - 1)] -join '\') -WhatIf:$WhatIf }
-    Ensure-Dir $m $GamePath $d -WhatIf:$WhatIf
+    Ensure-Dir $m $GamePath $to -WhatIf:$WhatIf
     foreach ($sub in Get-ChildItem -LiteralPath $root -Directory -Recurse) {
-        Ensure-Dir $m $GamePath ($d + $sub.FullName.Substring($root.Length)) -WhatIf:$WhatIf
+        Ensure-Dir $m $GamePath ($to + $sub.FullName.Substring($root.Length)) -WhatIf:$WhatIf
     }
     $files = @(Get-ChildItem -LiteralPath $root -File -Recurse)
     foreach ($f in $files) {
-        $rel = $d + $f.FullName.Substring($root.Length)
+        $rel = $to + $f.FullName.Substring($root.Length)
         Register-Target $m $GamePath $rel -WhatIf:$WhatIf
         if (-not $WhatIf) { Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $GamePath $rel) -Force }
     }
-    Write-Info "$d\ ($($files.Count) files)"
+    Write-Info "$d\ ($($files.Count) files)$(if ($to -ne $d) { " -> $to\" })"
 }
 
 function Put-File([string]$src, [string]$rel) {
@@ -203,6 +215,8 @@ try {
             Put-File (Join-Path $payload 'wiz8hd.ini') 'wiz8hd.ini'
         }
         foreach ($d in Get-HdDirs) { Put-Dir $d }
+        $captions = Get-CaptionDir
+        if ($captions) { Put-Dir $captions 'wiz8hd_ui\sti' }
     }
 
     # ---------- 3b. Russian location texts ----------

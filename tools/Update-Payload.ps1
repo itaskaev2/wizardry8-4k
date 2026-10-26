@@ -4,7 +4,8 @@
 .DESCRIPTION
   Copies wiz8hd.asi, the wiz8hd.ini template, wiz8hd_fonts\ and wiz8hd_bg\ from <HdUi>\dist, the HD portraits
   (<Portraits>\PORTRAITS, made by wizardry8-hdui tools\portraits_ship.py) to wiz8hd_ui\sti\PORTRAITS, the HD
-  interface pictures (<Interface>\<STI folder>, made by wizardry8-hdui tools\xbr_ui.py) to wiz8hd_ui\sti\, and
+  interface pictures (<Interface>\<STI folder>, made by wizardry8-hdui tools\xbr_ui.py) to wiz8hd_ui\sti\, the
+  menu captions per language (<HdUi>\work\sti_xbr_rus|eng) to wiz8hd_ui\captions\rus|eng, and
   dgVoodoo.conf from <GameConf>, then writes payload\VERSION.txt with the source commit.
   Run it after rebuilding the mod (wizardry8-hdui: ./build.sh, copy build\wiz8hd.asi to dist\).
 #>
@@ -47,6 +48,17 @@ if (Test-Path $Interface) {
         Copy-Item $dir.FullName (Join-Path $sti $dir.Name) -Recurse
     }
 }
+# menu captions per language (wizardry8-hdui: XBR_CAPTIONS=1 tools\xbr_ui.py -> work\sti_xbr_rus, work\sti_xbr_eng)
+$nCaptions = @()
+foreach ($lang in 'rus', 'eng') {
+    $src = Join-Path $HdUi "work\sti_xbr_$lang"
+    if (-not (Test-Path $src)) { continue }
+    $dst = Join-Path $payload "wiz8hd_ui\captions\$lang"
+    if (Test-Path $dst) { Remove-Item $dst -Recurse -Force }
+    New-Item -ItemType Directory -Force (Split-Path $dst) | Out-Null
+    Copy-Item $src $dst -Recurse
+    $nCaptions += "$lang $(@(Get-ChildItem $dst -Recurse -File -Filter *.png).Count)"
+}
 $nPortraits = if (Test-Path (Join-Path $sti 'PORTRAITS')) { @(Get-ChildItem (Join-Path $sti 'PORTRAITS') -Recurse -File -Filter *.png).Count } else { 0 }
 $nInterface = if (Test-Path $sti) { @(Get-ChildItem $sti -Directory | Where-Object { $_.Name -ne 'PORTRAITS' } | Get-ChildItem -Recurse -File -Filter *.png).Count } else { 0 }
 # the ini template: the dist one plus the background switch, HD pictures on when any ship, logging off
@@ -69,6 +81,7 @@ $asiHash = (Get-FileHash (Join-Path $payload 'wiz8hd.asi') -Algorithm SHA256).Ha
     "backgrounds: $((Get-ChildItem (Join-Path $payload 'wiz8hd_bg') -Filter *.raw).Count)"
     "portraits: $nPortraits"
     "interface pictures: $nInterface"
+    "captions: $($nCaptions -join ', ')"
     "updated: $(Get-Date -Format 'yyyy-MM-dd HH:mm')"
 ) | Set-Content (Join-Path $payload 'VERSION.txt') -Encoding ASCII
 Get-Content (Join-Path $payload 'VERSION.txt')
