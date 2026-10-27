@@ -151,7 +151,7 @@ Replaced files are saved in `<game>\_wiz8_4k\backup`, the list is in `_wiz8_4k\m
 `Wiz8.CFG`, `Wiz8.exe` and the archives in `Data\` are not touched. No administrator rights needed.
 
 Mod settings are in `wiz8hd.ini` in the game folder: `Aspect`, `Layout` (interface at the edges / 4:3 in the
-centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), `Sprites` (HD pictures), `Sides` (stone at the sides), `Log`, and the `[Fonts]` section
+centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), `Sprites` (HD pictures), `Sides` (stone at the sides), `DrawDistance` (3D view distance, a multiple of the game's own; 2 by default), `Log`, and the `[Fonts]` section
 (font and scale for each game font).
 
 ## How the mod works

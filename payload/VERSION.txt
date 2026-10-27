@@ -1,7 +1,7 @@
-wizardry8-hdui: 71c53d6 No item ghosts, whole NPC talk panel, faster HD layer updates
-wiz8hd.asi sha256: ca3f63bf634c48ee564d69e673b09e996cf2d39a129740c90cb44cf0ba619f25
+wizardry8-hdui: 45146fc DrawDistance: 3D view distance multiplier applied on every level load
+wiz8hd.asi sha256: cd0bf9517b39fa206f62a97e8389ccad71bddf19f9c750c1895e6fc52b756f21
 backgrounds: 42
 portraits: 982
 interface pictures: 4765
 captions: rus 62, eng 62
-updated: 2026-10-26 17:52
+updated: 2026-10-27 11:12
