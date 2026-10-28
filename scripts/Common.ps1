@@ -5,7 +5,10 @@ $script:SteamAppId = '245450'
 
 # Known files. Wiz8_v128.exe is what the mod is written against; anything else is refused.
 $script:Known = @{
-    'Wiz8_v128.exe' = @{ 'fdca6d9cd0940034191e82b8e2900de26bb25e381c74128dcb8967360a9fb824' = 'Fan Patch 1.28 (build 1.2.8)' }
+    'Wiz8_v128.exe' = @{
+        'fdca6d9cd0940034191e82b8e2900de26bb25e381c74128dcb8967360a9fb824' = 'Fan Patch 1.28 (build 1.2.8)'
+        '487612705c728f7c2c0127a8fafac434fc0a20f1cae1f5546e9231f2d39f09b3' = 'Fan Patch 1.28 (build 1.2.8), Large Address Aware'
+    }
     'Wiz8.dll'      = @{
         '28953363c6090f12a7a466397b619c43e6f26da28dbc5f8554d822ee66259378' = 'Fan Patch 1.28 build 6709'
         '702851cf5bc09d9d5c749f11c5c058e62a27f4be8975718f54cceb6c127da612' = 'Fan Patch 1.28 build 6735 (Mini-Update)'
@@ -28,6 +31,28 @@ function Write-Warn2([string]$msg) { Write-Host "    WARNING: $msg" -ForegroundC
 
 function Get-Sha256([string]$path) {
     (Get-FileHash -LiteralPath $path -Algorithm SHA256).Hash.ToLower()
+}
+
+# Large Address Aware (flag 0x20 in the PE file header): the 32-bit game gets 4 GB of address space on 64-bit
+# Windows instead of 2 GB. HD 3D textures need it (Arnika ran out of address space and crashed in the renderer).
+# Wiz8_v128.exe has no PE checksum, so this one flag is the whole change.
+function Get-PeCharacteristicsOffset([byte[]]$b) { [BitConverter]::ToInt32($b, 0x3C) + 22 }
+
+function Test-LargeAddressAware([string]$path) {
+    $b = [IO.File]::ReadAllBytes($path)
+    return [bool]([BitConverter]::ToUInt16($b, (Get-PeCharacteristicsOffset $b)) -band 0x20)
+}
+
+function Set-LargeAddressAware([string]$path, [bool]$on = $true) {
+    $b = [IO.File]::ReadAllBytes($path)
+    $off = Get-PeCharacteristicsOffset $b
+    $ch = [BitConverter]::ToUInt16($b, $off)
+    $new = if ($on) { $ch -bor 0x20 } else { $ch -band 0xFFDF }
+    if ($new -eq $ch) { return $false }
+    $nb = [BitConverter]::GetBytes([uint16]$new)
+    $b[$off] = $nb[0]; $b[$off + 1] = $nb[1]
+    [IO.File]::WriteAllBytes($path, $b)
+    return $true
 }
 
 # GitHub's "Download ZIP" has Git LFS pointer stubs in place of the fonts, backgrounds and portraits.

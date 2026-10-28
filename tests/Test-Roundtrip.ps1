@@ -39,6 +39,7 @@ function New-Game([string]$name) {
     $g = Join-Path $work $name
     New-Item -ItemType Directory -Force (Join-Path $g 'mods') | Out-Null
     foreach ($f in 'Wiz8_v128.exe', 'Wiz8.dll') { Copy-Item -LiteralPath (Join-Path $Source $f) $g }
+    [void](Set-LargeAddressAware (Join-Path $g 'Wiz8_v128.exe') $false)   # the Fan Patch exe as shipped
     Copy-Item -LiteralPath (Join-Path $Source 'mods\dgVoodoo2_87_5.zip') (Join-Path $g 'mods')
     [IO.File]::WriteAllText((Join-Path $g '3DVideo.CFG'), "Glide2x`r`n800`r`n600`r`n16`r`nMiles Fast 2D Positional Audio`r`n")
     Set-Content -LiteralPath (Join-Path $g 'Wiz8.exe') -Value 'stand-in' -Encoding ASCII
@@ -90,12 +91,14 @@ Check ((Get-ItemProperty $regKey).Splash -eq 0) 'nGlide Splash = 0'
 $lnk = Join-Path $desk $script:ShortcutName
 Check ((Test-Path $lnk) -and ((New-Object -ComObject WScript.Shell).CreateShortcut($lnk).TargetPath -ieq (Join-Path $g 'Wiz8_v128.exe'))) 'shortcut -> Wiz8_v128.exe'
 $m1 = Read-Manifest $g
-Check ($m1.backedUp.Count -eq 1 -and $m1.backedUp[0] -eq '3DVideo.CFG') 'only 3DVideo.CFG backed up'
+Check ($m1.backedUp.Count -eq 2 -and (Test-Listed $m1.backedUp '3DVideo.CFG') -and (Test-Listed $m1.backedUp 'Wiz8_v128.exe')) 'only 3DVideo.CFG and Wiz8_v128.exe backed up'
+Check ((Get-Sha256 (Join-Path $g 'Wiz8_v128.exe')) -eq '487612705c728f7c2c0127a8fafac434fc0a20f1cae1f5546e9231f2d39f09b3') 'Wiz8_v128.exe = Large Address Aware (one flag)'
+Check (-not (Test-LargeAddressAware (Join-Path $g '_wiz8_4k\backup\Wiz8_v128.exe'))) 'backup holds the exe without the flag'
 
 Set-Content -LiteralPath (Join-Path $g 'wiz8hd.ini') -Value '[HD]' -Encoding ASCII     # the player's own settings
 Run 'install.ps1' ($common + @{ GamePath = $g })
 $m2 = Read-Manifest $g
-Check ($m2.backedUp.Count -eq 1 -and $m2.created.Count -eq $m1.created.Count) 'second install: same manifest, originals not overwritten'
+Check ($m2.backedUp.Count -eq 2 -and $m2.created.Count -eq $m1.created.Count) 'second install: same manifest, originals not overwritten'
 Check ((Get-Content -LiteralPath (Join-Path $g 'wiz8hd.ini') -Raw).Trim() -eq '[HD]') 'second install keeps wiz8hd.ini'
 Check ((Get-Content -LiteralPath (Join-Path $g '_wiz8_4k\backup\3DVideo.CFG') -Raw).StartsWith('Glide2x')) 'backup still holds the Steam 3DVideo.CFG'
 
@@ -160,7 +163,7 @@ $msgs = @(Get-ChildItem -LiteralPath (Join-Path $g 'Data\Messages') -Filter *.MS
 Check ($msgs.Count -eq 14) "Data\Messages: 14 Russian .MSG files ($($msgs.Count))"
 Check ((Get-Sha256 (Join-Path $g 'Data\Messages\MONASTERY.MSG')) -eq 'dbbc7655cb40cd042bb02b3744445fd6bcac410ea01744fb3a342c44d9e620df') 'MONASTERY.MSG = the Fan Patch Russian texts'
 Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true })
-Check (@((Read-Manifest $g).backedUp).Count -eq 1) 'second install: the .MSG files are not backed up as originals'
+Check (@((Read-Manifest $g).backedUp).Count -eq 2) 'second install: the .MSG files are not backed up as originals'
 Run 'uninstall.ps1' @{ GamePath = $g }
 Check (Same $before (Snapshot $g)) 'uninstall: Data\Messages removed, folder byte-identical'
 Remove-Item -LiteralPath (Join-Path $g 'Data\RUS.SLF')
@@ -202,6 +205,20 @@ foreach ($lang in 'rus', 'eng') {
     Run 'uninstall.ps1' @{ GamePath = $g }
     Check (Same $before (Snapshot $g)) "$lang`: uninstall byte-identical"
 }
+
+# ---------- G: Large Address Aware switched off / already on ----------
+Write-Host 'G: -NoLargeAddress leaves the exe alone; an exe with the flag already set is accepted and kept'
+$g = New-Game 'laa'
+$exeHash = Get-Sha256 (Join-Path $g 'Wiz8_v128.exe')
+Run 'install.ps1' ($common + @{ GamePath = $g; NoLargeAddress = $true; NoHdUi = $true })
+Check ((Get-Sha256 (Join-Path $g 'Wiz8_v128.exe')) -eq $exeHash -and -not (Test-Listed (Read-Manifest $g).backedUp 'Wiz8_v128.exe')) '-NoLargeAddress: exe untouched, not backed up'
+Run 'uninstall.ps1' @{ GamePath = $g }
+[void](Set-LargeAddressAware (Join-Path $g 'Wiz8_v128.exe'))
+$before = Snapshot $g
+Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true })
+Check (-not (Test-Listed (Read-Manifest $g).backedUp 'Wiz8_v128.exe')) 'flag already on: exe accepted, not backed up'
+Run 'uninstall.ps1' @{ GamePath = $g }
+Check (Same $before (Snapshot $g)) 'flag already on: uninstall keeps that exe'
 
 Check ((Real-State) -eq $realBefore) 'real nGlide key and real Desktop shortcut untouched'
 Remove-Item 'HKCU:\Software\Wiz8_4k_test' -Recurse -Force -ErrorAction SilentlyContinue

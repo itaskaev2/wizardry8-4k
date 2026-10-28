@@ -15,6 +15,8 @@
     4. nGlide: 3dfx splash off (HKCU\Software\Zeus Software\nGlide2 Splash=0).
     5. Desktop shortcut "Wizardry 8 (Fan Patch 4K)" -> Wiz8_v128.exe (Steam's Play button runs the
        original Wiz8.exe 1.2.4, where the mod stays inactive).
+    6. Wiz8_v128.exe: Large Address Aware flag (4 GB of address space instead of 2 GB; with HD 3D textures big
+       locations like Arnika ran out of it and crashed). The original exe is backed up like any replaced file.
   Every replaced file is kept in <game>\_wiz8_4k\backup and listed in _wiz8_4k\manifest.json;
   uninstall.ps1 puts everything back. Running install.ps1 again updates in place (originals stay backed up).
 .EXAMPLE
@@ -34,6 +36,7 @@ param(
     [switch]$NoRusTexts,         # keep the English location texts in a Russian game (no Data\Messages\*.MSG)
     [switch]$ResetConfig,        # overwrite an existing wiz8hd.ini / dgVoodoo.conf with the defaults
     [switch]$NoShortcut,
+    [switch]$NoLargeAddress,     # leave Wiz8_v128.exe untouched (no 4 GB Large Address Aware flag)
     [string]$ShortcutDir = [Environment]::GetFolderPath('Desktop'),
     [switch]$SkipNGlide,
     [string]$NGlideKey,          # registry key override (tests)
@@ -271,6 +274,18 @@ try {
             $s.Save()
         }
         Write-Info $lnk
+    }
+
+    # ---------- 6. 4 GB address space ----------
+    if (-not $NoLargeAddress) {
+        Write-Step 'Wiz8_v128.exe: Large Address Aware (4 GB address space)'
+        if (Test-LargeAddressAware $exe) {
+            Write-Info 'already on'
+        } else {
+            Register-Target $m $GamePath 'Wiz8_v128.exe' -WhatIf:$WhatIf
+            if (-not $WhatIf) { [void](Set-LargeAddressAware $exe) }
+            Write-Info 'flag set (uninstall.ps1 puts the original exe back)'
+        }
     }
 } finally {
     if (-not $WhatIf) { Save-Manifest $m $GamePath }

@@ -88,7 +88,10 @@ screenshots were taken with the Russian game language; the mod works with any la
    - downloads [dgVoodoo2 2.87.5 from the official GitHub](https://github.com/dege-diosg/dgVoodoo2/releases/tag/v2.87.5)
      and checks its SHA-256 (author's site: [dege.freeweb.hu](http://dege.freeweb.hu/));
    - downloads the HD backgrounds and fonts (GitHub's ZIP has Git LFS stubs in their place) and checks their SHA-256;
-   - sets the resolution, dgVoodoo2 and the HD interface, turns off the 3dfx logo and creates a desktop shortcut.
+   - sets the resolution, dgVoodoo2 and the HD interface, turns off the 3dfx logo and creates a desktop shortcut;
+   - sets the Large Address Aware flag on `Wiz8_v128.exe`: the game gets 4 GB of memory instead of 2 (with HD 3D
+     textures big locations such as Arnika hit 2 GB and crashed). It is one bit in the exe header; the original is
+     kept in the backup. Steam's "verify files" puts the old exe back; run the installer again after that.
 
 5. **Play through the "Wizardry 8 (Fan Patch 4K)" shortcut** on the desktop. Steam's Play button starts the
    original `Wiz8.exe` without the patch and the mod.
@@ -126,6 +129,7 @@ From PowerShell: `powershell -ExecutionPolicy Bypass -File .\install.ps1 [option
 | `-NoHdUi` | only the resolution and borderless screen, no HD interface |
 | `-ResetConfig` | replace an existing `wiz8hd.ini` / `dgVoodoo.conf` with the defaults |
 | `-NoShortcut`, `-SkipNGlide`, `-Offline` | no shortcut / no nGlide setting / no downloads |
+| `-NoLargeAddress` | no 4 GB flag, leave `Wiz8_v128.exe` as it is |
 
 Running it again updates the installation in place; your `wiz8hd.ini` and `dgVoodoo.conf` are kept. If the kept
 `wiz8hd.ini` has `Sprites=0` (the default before the HD portraits), the installer warns: set `Sprites=1` or run
@@ -159,7 +163,7 @@ centre), `Text` (TrueType fonts), `MatchWidth`, `Backgrounds` (HD backgrounds), 
 `wiz8hd.asi` is the mod itself: an ordinary 32-bit Windows DLL (about 230 KB) named `.asi` instead of `.dll`.
 Wizardry 8 has no mod loader of its own, but the Miles sound library that ships with the game loads every `*.asi`
 in the game folder at startup. The mod comes in that way and hooks the functions it needs in the memory of
-`Wiz8_v128.exe`; no game files are changed. It checks the exe and turns itself off for anything other than
+`Wiz8_v128.exe`; the mod itself changes no game files (the installer sets the exe's 4 GB flag). It checks the exe and turns itself off for anything other than
 Fan Patch 1.28.
 
 In the game it:
