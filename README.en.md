@@ -65,8 +65,8 @@ screenshots were taken with the Russian game language; the mod works with any la
 - Windows 10 or 11, a Direct3D 11 graphics card, preferably a 16:9 monitor.
 - Wizardry 8 from Steam.
 - **Fan Patch 1.28**, an unofficial community patch. Steam does not include it; download it separately (step 2).
-- **dgVoodoo2**. Steam does not include it either; the installer downloads it for you (step 4).
-- An internet connection during installation and about 450 MB of disk space.
+- **dgVoodoo2**. Steam does not include it either; it is in the release zip (or the installer downloads it).
+- About 450 MB of disk space, plus about 2.9 GB with the HD 3D-world textures.
 
 ## Installation
 
@@ -82,13 +82,21 @@ screenshots were taken with the Russian game language; the mod works with any la
 3. **Run `Wiz8_v128.exe`** from the game folder, choose a language, press **Check for updates** in the patch's
    launcher and let it update. Then close the game.
 
-4. **Download this installer**: **Code → Download ZIP** on this page, extract it anywhere and double-click
-   `install.cmd`. The installer:
+4. **Download the installer from the [releases page](https://github.com/itaskaev2/wizardry8-4k/releases/latest)**:
+   - `Wizardry8-4K-<version>.zip`: the installer, the HD interface and dgVoodoo2 (about 450 MB);
+   - `Wizardry8-4K-<version>-textures.zip`: HD 3D-world textures: walls, ground, monsters, items (about 1.9 GB,
+     optional).
+
+   Extract both into the same folder (you get one `Wizardry8-4K` folder with `textures\` inside) and double-click
+   `install.cmd`. No internet needed: everything is in the zips. Without the release: **Code → Download ZIP** on
+   this page; the installer then downloads dgVoodoo2 and the pictures itself, but there are no HD textures.
+   The installer:
    - finds the game in your Steam libraries;
-   - downloads [dgVoodoo2 2.87.5 from the official GitHub](https://github.com/dege-diosg/dgVoodoo2/releases/tag/v2.87.5)
+   - takes dgVoodoo2 from the zip or downloads [dgVoodoo2 2.87.5 from the official GitHub](https://github.com/dege-diosg/dgVoodoo2/releases/tag/v2.87.5)
      and checks its SHA-256 (author's site: [dege.freeweb.hu](http://dege.freeweb.hu/));
    - downloads the HD backgrounds and fonts (GitHub's ZIP has Git LFS stubs in their place) and checks their SHA-256;
    - sets the resolution, dgVoodoo2 and the HD interface, turns off the 3dfx logo and creates a desktop shortcut;
+   - puts in the HD 3D-world textures when the `textures\` folder from the second zip is next to it;
    - sets the Large Address Aware flag on `Wiz8_v128.exe`: the game gets 4 GB of memory instead of 2 (with HD 3D
      textures big locations such as Arnika hit 2 GB and crashed). It is one bit in the exe header; the original is
      kept in the backup. Steam's "verify files" puts the old exe back; run the installer again after that.
@@ -126,6 +134,7 @@ From PowerShell: `powershell -ExecutionPolicy Bypass -File .\install.ps1 [option
 | `-NoPortraits` | no HD portraits (−116 MB) |
 | `-NoInterface` | no HD interface pictures or menu captions: frames, buttons, icons, items (−258 MB) |
 | `-NoRusTexts` | keep the location texts in English in a Russian game |
+| `-NoTextures` | no HD 3D-world textures even when the `textures\` folder is there |
 | `-NoHdUi` | only the resolution and borderless screen, no HD interface |
 | `-ResetConfig` | replace an existing `wiz8hd.ini` / `dgVoodoo.conf` with the defaults |
 | `-NoShortcut`, `-SkipNGlide`, `-Offline` | no shortcut / no nGlide setting / no downloads |
@@ -147,6 +156,8 @@ with `-ResetConfig`.
 | HD portraits (982 frames: small, medium, large, blinking and talking) | `wiz8hd_ui\sti\PORTRAITS\` |
 | HD interface pictures (4765 frames: frames, buttons, icons, items, spells, automap, character creation) | the other folders of `wiz8hd_ui\sti\` |
 | HD menu captions (62 frames: main menu, options, save/load buttons) in the game's language: Russian when `Data\RUS.SLF` is there, English otherwise | `wiz8hd_ui\sti\OPTIONS\` (from `payload\wiz8hd_ui\captions\rus` or `eng`) |
+| HD 3D-world textures (6948: walls, ground, monsters, items on the ground; small ones 4x, 256 px ones 2x), when the second zip is extracted | loose `*.TGA` in `Levels\<location>\BITMAPS\`, `Data\Monsters\BITMAPS\`, `Data\ITEMS3D\bitmaps\`: the game reads them instead of the `LEVELS.SLF` / `MONSTERS.SLF` / `DATA.SLF` entries |
+| 4 GB of memory for the game instead of 2 | the Large Address Aware flag in the `Wiz8_v128.exe` header (original in the backup) |
 | Russian location texts (only with `Data\RUS.SLF`): diaries, signs, bookshelves | `Data\Messages\*.MSG`, built from the Fan Patch's Russian texts in `Data\FanPatch.Dat` |
 | No 3dfx logo | registry `HKCU\Software\Zeus Software\nGlide2`, `Splash=0` |
 | Shortcut | "Wizardry 8 (Fan Patch 4K)" on the desktop → `Wiz8_v128.exe` |
@@ -198,6 +209,8 @@ To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game
 - `tests\Build-CleanSteamCopy.ps1` builds a copy of the game in a separate folder from a list of files with hashes,
   to test in game without risk to the main install. Tested this way on 2026-10-24 (Fan Patch 6709, 3840x2160):
   menu, world, byte-for-byte uninstall.
+- `tools\Build-Release.ps1 -Version <v> -Out <folder>` builds the two release zips (the installer with payload
+  and dgVoodoo2; HD textures from `wizardry8-hdui` `tools\tex_hd.py`) and `SHA256SUMS.txt`; then `gh release create`.
 - `tools\Update-Payload.ps1` refreshes `payload\` after rebuilding the mod (`wizardry8-hdui`: `./build.sh`,
   `build\wiz8hd.asi` → `dist\`). Pictures and fonts are stored in Git LFS.
 - `tools\make_compare.py <wizardry8-hdui>\shots` builds the before/after pictures in `docs\` (Russian and English);
@@ -206,7 +219,8 @@ To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game
 ## Licenses and origin
 
 - Jost — SIL Open Font License (`payload\wiz8hd_fonts\Jost-LICENSE.txt`).
-- dgVoodoo2 — © Dege; not in this repository, downloaded from the official GitHub.
+- dgVoodoo2 — © Dege; not in this repository. The release zip carries the original, unmodified
+  `dgVoodoo2_87_5.zip`: its author allows shipping its components with a game mod.
 - Fan Patch 1.28 — GreatMage and the Cosmic Forge community; not in this repository, downloaded separately.
 - HD backgrounds — upscaled (Real-ESRGAN) and outpainted (SDXL inpainting) versions of the game's original pictures;
   the `.raw` files are copies of the original 640x480 backgrounds the mod uses to recognize the screen. The rights to
@@ -219,6 +233,9 @@ To remove the mod by hand, delete these files (or run `uninstall.cmd`); the game
   transparency. Shared on the same terms. Without them: `-NoInterface`. The pictures with words on them (main menu,
   options buttons) are made separately from the Russian (`RUS.SLF`) and English (`DATA.SLF`) originals; the main
   menu captions are cut out of their old 640x480 background, so the wide HD picture shows under them.
+- HD 3D-world textures: the game's own textures, upscaled 4x (4xNomos8kDAT) without painting in new details; the
+  256 px ones are scaled back to 2x so the game fits in memory. Shared on the same terms, as a separate release
+  zip. Without them: do not download that zip, or `-NoTextures`.
 - `wiz8hd.asi` — the built mod; its source is in a separate repository, `wizardry8-hdui` (not published yet).
 - Wizardry 8 was developed by Sir-Tech Canada; Wizardry is a trademark of its rights holder. This project is not
   affiliated with the rights holder, Steam or the Fan Patch authors.

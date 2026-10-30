@@ -220,6 +220,27 @@ Check (-not (Test-Listed (Read-Manifest $g).backedUp 'Wiz8_v128.exe')) 'flag alr
 Run 'uninstall.ps1' @{ GamePath = $g }
 Check (Same $before (Snapshot $g)) 'flag already on: uninstall keeps that exe'
 
+# ---------- H: HD 3D textures from a textures\ folder (the release's second zip) ----------
+Write-Host 'H: textures\ -> loose TGAs in Levels\ and Data\, a foreign loose file kept, uninstall byte-identical'
+$g = New-Game 'textures'
+$tex = Join-Path $work 'tex'
+foreach ($rel in 'Levels\ARNIKA\BITMAPS\WALL.TGA', 'Data\Monsters\BITMAPS\RAT.TGA', 'Data\ITEMS3D\bitmaps\metal_02.tga') {
+    New-Item -ItemType Directory -Force (Split-Path (Join-Path $tex $rel) -Parent) | Out-Null
+    Set-Content -LiteralPath (Join-Path $tex $rel) -Value "hd $rel" -Encoding ASCII
+}
+New-Item -ItemType Directory -Force (Join-Path $g 'Data\ITEMS3D\bitmaps') | Out-Null
+Set-Content -LiteralPath (Join-Path $g 'Data\ITEMS3D\bitmaps\metal_02.tga') -Value 'fan patch' -Encoding ASCII
+New-Item -ItemType Directory -Force (Join-Path $g 'Levels') | Out-Null
+$before = Snapshot $g
+Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true; TexturesPath = $tex })
+Check ((Get-Content -LiteralPath (Join-Path $g 'Levels\ARNIKA\BITMAPS\WALL.TGA') -Raw).Trim() -eq 'hd Levels\ARNIKA\BITMAPS\WALL.TGA') 'level texture installed'
+Check (Test-Path -LiteralPath (Join-Path $g 'Data\Monsters\BITMAPS\RAT.TGA')) 'monster texture installed'
+Check ((Get-Content -LiteralPath (Join-Path $g 'Data\ITEMS3D\bitmaps\metal_02.tga') -Raw).Trim() -eq 'fan patch') 'foreign loose texture kept'
+Run 'install.ps1' ($common + @{ GamePath = $g; NoHdUi = $true; TexturesPath = $tex })
+Check (@((Read-Manifest $g).backedUp).Count -eq 2) 'second install: textures not backed up as originals'
+Run 'uninstall.ps1' @{ GamePath = $g }
+Check (Same $before (Snapshot $g)) 'uninstall: textures and their folders removed, byte-identical'
+
 Check ((Real-State) -eq $realBefore) 'real nGlide key and real Desktop shortcut untouched'
 Remove-Item 'HKCU:\Software\Wiz8_4k_test' -Recurse -Force -ErrorAction SilentlyContinue
 Remove-Item $work -Recurse -Force

@@ -222,9 +222,23 @@ function Test-Listed($list, [string]$rel) {
     return $false
 }
 
+# created + backedUp as a case-insensitive set: Test-Listed is a linear scan, too slow for thousands of textures.
+function Get-ListedSet($m) {
+    $n = $m.created.Count + $m.backedUp.Count
+    if (-not $script:ListedSet -or $script:ListedSetCount -ne $n) {
+        $script:ListedSet = New-Object 'System.Collections.Generic.HashSet[string]' ([StringComparer]::OrdinalIgnoreCase)
+        foreach ($x in $m.created) { [void]$script:ListedSet.Add($x) }
+        foreach ($x in $m.backedUp) { [void]$script:ListedSet.Add($x) }
+        $script:ListedSetCount = $n
+    }
+    return , $script:ListedSet          # the comma keeps PowerShell from unrolling an empty set into $null
+}
+
 # Before writing <game>\<rel>: remember it was created, or keep the original once in backup\.
 function Register-Target($m, [string]$GamePath, [string]$rel, [switch]$WhatIf) {
-    if ((Test-Listed $m.created $rel) -or (Test-Listed $m.backedUp $rel)) { return }
+    $set = Get-ListedSet $m
+    if ($set.Contains($rel)) { return }
+    [void]$set.Add($rel); $script:ListedSetCount++
     $full = Join-Path $GamePath $rel
     if (Test-Path -LiteralPath $full) {
         $bak = Join-Path (Join-Path (Get-StateDir $GamePath) 'backup') $rel

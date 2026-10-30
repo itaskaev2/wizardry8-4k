@@ -3,13 +3,18 @@
   Wizardry 8 (Steam) for 4K / any native resolution, borderless, with the wiz8hd HD interface mod.
 .DESCRIPTION
   Needs the Steam version with the community Fan Patch 1.28 (Wiz8_v128.exe) extracted into the game folder;
-  Steam does not ship it (see README, "Требования"). dgVoodoo2 comes from mods\dgVoodoo2_87_5.zip or GitHub.
+  Steam does not ship it (see README.en.md, "What you need"). dgVoodoo2 comes from mods\dgVoodoo2_87_5.zip in the
+  game folder or next to this script (the release zip), else from GitHub.
     1. 3DVideo.CFG: DirectX7_1 renderer at the display's native resolution, 32-bit.
     2. dgVoodoo2 2.87.5 (DDraw.dll, D3DImm.dll, dgVoodooCpl.exe) + dgVoodoo.conf: fake fullscreen
        (borderless over the whole screen), 16x anisotropic, 8x MSAA, no watermark.
     3. wiz8hd.asi + wiz8hd.ini + wiz8hd_fonts\ + wiz8hd_bg\ + wiz8hd_ui\: HD TrueType text, HUD at the screen
        edges, wide HD menu/loading/camp pictures, stone beside full-screen screens, HD character portraits and
        HD interface pictures, the menu captions in the game's language (Miles loads *.asi from the game folder).
+    3a. HD 3D-world textures (walls, ground, monsters, items on the ground) when the textures package was
+       extracted next to this script (textures\, the release's second zip): loose TGAs under Levels\ and Data\
+       that the game reads instead of its LEVELS.SLF / MONSTERS.SLF / DATA.SLF entries. Loose files that are
+       already there (Fan Patch, other mods) are left alone.
     3b. A game with a Russian translation (Data\RUS.SLF) gets its location texts (diaries, signs) in Russian:
        Data\Messages\*.MSG made from the Fan Patch's own Russian copies in Data\FanPatch.Dat.
     4. nGlide: 3dfx splash off (HKCU\Software\Zeus Software\nGlide2 Splash=0).
@@ -34,6 +39,8 @@ param(
     [switch]$NoPortraits,        # the mod without the HD portraits (wiz8hd_ui\sti\PORTRAITS\)
     [switch]$NoInterface,        # the mod without the HD interface pictures (the rest of wiz8hd_ui\sti\)
     [switch]$NoRusTexts,         # keep the English location texts in a Russian game (no Data\Messages\*.MSG)
+    [switch]$NoTextures,         # leave the game's 3D textures as they are even when textures\ is here
+    [string]$TexturesPath,       # the HD 3D textures folder (default: textures\ next to this script)
     [switch]$ResetConfig,        # overwrite an existing wiz8hd.ini / dgVoodoo.conf with the defaults
     [switch]$NoShortcut,
     [switch]$NoLargeAddress,     # leave Wiz8_v128.exe untouched (no 4 GB Large Address Aware flag)
@@ -48,6 +55,7 @@ $ErrorActionPreference = 'Stop'
 . (Join-Path $PSScriptRoot 'scripts\Common.ps1')
 . (Join-Path $PSScriptRoot 'scripts\RusMessages.ps1')
 if (-not $NGlideKey) { $NGlideKey = $script:DefaultNGlideKey }
+if (-not $TexturesPath) { $TexturesPath = Join-Path $PSScriptRoot 'textures' }
 $payload = Join-Path $PSScriptRoot 'payload'
 
 # The payload folders the mod gets: fonts always; backgrounds, portraits and interface pictures (one folder per
@@ -168,6 +176,9 @@ try {
     # ---------- 2. dgVoodoo2 ----------
     Write-Step 'dgVoodoo2 2.87.5'
     $zip = Join-Path $GamePath $script:DgVoodoo.Zip
+    $here = Join-Path $PSScriptRoot $script:DgVoodoo.Zip           # the release zip ships the original package
+    if (((-not (Test-Path -LiteralPath $zip)) -or (Get-Sha256 $zip) -ne $script:DgVoodoo.Sha256) -and
+        (Test-Path -LiteralPath $here) -and (Get-Sha256 $here) -eq $script:DgVoodoo.Sha256) { $zip = $here }
     $tmpZip = $null
     if (-not (Test-Path -LiteralPath $zip) -or (Get-Sha256 $zip) -ne $script:DgVoodoo.Sha256) {
         if ($Offline) { throw "$($script:DgVoodoo.Zip) is missing or different, and -Offline was given." }
@@ -220,6 +231,31 @@ try {
         foreach ($d in Get-HdDirs) { Put-Dir $d }
         $captions = Get-CaptionDir
         if ($captions) { Put-Dir $captions 'wiz8hd_ui\sti' }
+    }
+
+    # ---------- 3a. HD 3D-world textures ----------
+    if (-not $NoTextures -and (Test-Path -LiteralPath $TexturesPath)) {
+        Write-Step 'HD 3D-world textures'
+        $root = (Resolve-Path -LiteralPath $TexturesPath).Path.TrimEnd('\')
+        $files = @(Get-ChildItem -LiteralPath $root -File -Recurse)
+        $mine = Get-ListedSet $m
+        $put = 0; $kept = 0
+        foreach ($dir in ($files | ForEach-Object { $_.DirectoryName } | Sort-Object -Unique)) {
+            $relDir = $dir.Substring($root.Length + 1)
+            $parts = $relDir -split '\\'
+            for ($i = 1; $i -le $parts.Count; $i++) { Ensure-Dir $m $GamePath ($parts[0..($i - 1)] -join '\') -WhatIf:$WhatIf }
+        }
+        foreach ($f in $files) {
+            $rel = $f.FullName.Substring($root.Length + 1)
+            if (-not $mine.Contains($rel) -and (Test-Path -LiteralPath (Join-Path $GamePath $rel))) { $kept++; continue }
+            Register-Target $m $GamePath $rel -WhatIf:$WhatIf
+            if (-not $WhatIf) { Copy-Item -LiteralPath $f.FullName -Destination (Join-Path $GamePath $rel) -Force }
+            $put++
+        }
+        Write-Info "$put textures$(if ($kept) { ", $kept loose files already in the game kept" })"
+        if ($NoLargeAddress) { Write-Warn2 'HD textures need the 4 GB flag: big locations (Arnika) can crash with -NoLargeAddress.' }
+    } elseif (-not $NoTextures) {
+        Write-Info 'HD 3D-world textures: no textures\ folder next to the installer (the release''s textures zip), skipped'
     }
 
     # ---------- 3b. Russian location texts ----------
